@@ -1,6 +1,6 @@
 # EvidenX
 
-This is a code bundle for EvidenX
+This is the FE code for EvidenX
 
 ## Running the code
 
