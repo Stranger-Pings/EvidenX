@@ -126,6 +126,16 @@
     @apply bg-background text-foreground;
   }
 
+  @layer utilities {
+    .hover-lift {
+      @apply transition-transform duration-200 ease-out;
+      will-change: transform, box-shadow;
+    }
+    .hover-lift:hover {
+      @apply -translate-y-0.5 shadow-lg; /* move up ~2px + stronger shadow */
+    }
+  }
+
   *,
   ::before,
   ::after {

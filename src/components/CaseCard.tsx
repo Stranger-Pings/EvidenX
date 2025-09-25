@@ -18,7 +18,7 @@ interface CaseCardProps {
 
 export function CaseCard({ case_, onCaseSelect }: CaseCardProps) {
   return (
-    <Card className="hover:shadow-sm transition-shadow flex flex-col h-full">
+    <Card className="hover-lift transition-shadow flex flex-col h-full">
       <CardHeader className="pb-3 flex-shrink-0">
         <div className="flex items-start justify-between mb-3">
           <div className="flex gap-2">
