@@ -6,7 +6,7 @@ import { CaseDetailsPage } from "./components/CaseDetailsPage";
 import { VideoEvidenceProcessing } from "./components/VideoEvidenceProcessing";
 import { AudioEvidenceProcessing } from "./components/AudioEvidenceProcessing";
 import { AudioComparison } from "./components/AudioComparison";
-import { IncidentTimeline } from "./components/IncidentTimeline";
+import IncidentTimeline from "./components/IncidentTimeline";
 
 type ViewType =
   | "registration"
