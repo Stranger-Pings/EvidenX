@@ -5,13 +5,13 @@
 @layer base {
   :root {
     --font-size: 16px;
-    --background: #f9fafb;
+    --background: #f2f8fd;
     --foreground: #091930;
     --card: #ffffff;
     --card-foreground: #091930;
     --popover: #ffffff;
     --popover-foreground: #091930;
-    --primary: #14a4de;
+    --primary: #0055d6;
     --primary-foreground: #ffffff;
     --secondary: #e5effa;
     --secondary-foreground: #1a3a5c;

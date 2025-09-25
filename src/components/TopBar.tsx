@@ -122,9 +122,9 @@ export function TopBar({
             alt="EvidenX Logo"
             className="h-12 w-12"
           />
-          <span className="font-semibold text-lg">
-            Eviden<span style={{ color: "#14a4de" }}>X</span>
-          </span>
+          <h1 className="text-2xl font-bold">
+            Eviden<span className="text-[#00a4db]">X</span>
+          </h1>
         </div>
       </div>
 
