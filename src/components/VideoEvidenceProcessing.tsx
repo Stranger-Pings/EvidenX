@@ -62,7 +62,7 @@ export function VideoEvidenceProcessing({
     height: number;
   }>({ width: 0, height: 0 });
   const [chatQuery, setChatQuery] = useState("");
-  const [isChatLoading, setIsChatLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const HARDCODED_CHATS: ChatEntry[] = [
     {
@@ -235,72 +235,32 @@ export function VideoEvidenceProcessing({
   };
 
   const handleChatSubmit = () => {
-    if (!chatQuery.trim()) return;
-    const userQuery = chatQuery;
+    if (!chatQuery.trim() || isLoading) return;
+
+    setIsLoading(true);
     const nextIndex = chatHistory.length;
     const predefined = HARDCODED_CHATS[nextIndex];
-    if (predefined) {
-      setChatHistory((prev) => [...prev, predefined]);
-      // When a predefined result is appended, surface its timestamps as flags
-      // Color palette for different messages
-      const colorPalette = [
-        "bg-red-500", // First message - red
-        "bg-orange-500", // Second message - orange
-        "bg-blue-500", // Third message - blue
-        "bg-green-500", // Fourth message - green
-        "bg-purple-500", // Fifth message - purple
-        "bg-pink-500", // Sixth message - pink
-        "bg-yellow-500", // Seventh message - yellow
-        "bg-indigo-500", // Eighth message - indigo
-        "bg-teal-500", // Ninth message - teal
-        "bg-cyan-500", // Tenth message - cyan
-      ];
-      const color = colorPalette[nextIndex] || "bg-gray-500";
-      const label = `Result ${nextIndex + 1}`;
-      const newFlags = predefined.timestamps.map((t) => ({
-        time: t,
-        type: "person",
-        label,
-        color,
-      }));
-      setDetectedFlags((prev) =>
-        [...prev, ...newFlags]
-          .sort((a, b) => a.time - b.time)
-          .filter(
-            (flag, idx, arr) =>
-              arr.findIndex(
-                (f) => f.time === flag.time && f.color === flag.color
-              ) === idx
-          )
-      );
-    } else {
-      // Optional: append a simple echo if more queries are made
-      setChatHistory((prev) => [
-        ...prev,
-        {
-          query: chatQuery,
-          response: "No preset result for this query.",
-          timestamps: [],
-        },
-      ]);
-    }
-    setChatQuery("");
-    setIsChatLoading(true);
 
+    // Add 3-second delay before showing the response
     setTimeout(() => {
-      setIsChatLoading(false);
-
-      const predefined = HARDCODED_CHATS[nextIndex];
       if (predefined) {
-        setChatHistory((prev) => {
-          // Replace the "Thinking..." placeholder with actual response
-          const updated = [...prev];
-          updated[updated.length - 1] = predefined;
-          return updated;
-        });
-
-        const color = nextIndex === 0 ? "bg-red-500" : "bg-orange-500";
-        const label = nextIndex === 0 ? "Result 1" : "Result 2";
+        setChatHistory((prev) => [...prev, predefined]);
+        // When a predefined result is appended, surface its timestamps as flags
+        // Color palette for different messages
+        const colorPalette = [
+          "bg-red-500", // First message - red
+          "bg-orange-500", // Second message - orange
+          "bg-blue-500", // Third message - blue
+          "bg-green-500", // Fourth message - green
+          "bg-purple-500", // Fifth message - purple
+          "bg-pink-500", // Sixth message - pink
+          "bg-yellow-500", // Seventh message - yellow
+          "bg-indigo-500", // Eighth message - indigo
+          "bg-teal-500", // Ninth message - teal
+          "bg-cyan-500", // Tenth message - cyan
+        ];
+        const color = colorPalette[nextIndex] || "bg-gray-500";
+        const label = `Result ${nextIndex + 1}`;
         const newFlags = predefined.timestamps.map((t) => ({
           time: t,
           type: "person",
@@ -318,17 +278,19 @@ export function VideoEvidenceProcessing({
             )
         );
       } else {
-        setChatHistory((prev) => {
-          const updated = [...prev];
-          updated[updated.length - 1] = {
-            query: userQuery,
+        // Optional: append a simple echo if more queries are made
+        setChatHistory((prev) => [
+          ...prev,
+          {
+            query: chatQuery,
             response: "No preset result for this query.",
             timestamps: [],
-          };
-          return updated;
-        });
+          },
+        ]);
       }
-    }, 1000); // 1 second delay
+      setChatQuery("");
+      setIsLoading(false);
+    }, 3000);
   };
 
   const handleImageUpload = () => {
@@ -393,6 +355,23 @@ export function VideoEvidenceProcessing({
                 </div>
               </div>
             ))}
+
+            {/* Loading state */}
+            {isLoading && (
+              <div className="space-y-2">
+                <div className="bg-primary text-primary-foreground p-3 rounded-lg text-sm">
+                  {chatQuery}
+                </div>
+                <div className="bg-muted p-3 rounded-lg text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-blue-600"></div>
+                    <span className="text-muted-foreground">
+                      Intelligence analysis...
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -425,12 +404,23 @@ export function VideoEvidenceProcessing({
                 placeholder="e.g., person in blue shirt..."
                 value={chatQuery}
                 onChange={(e) => setChatQuery(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleChatSubmit()}
+                onKeyPress={(e) =>
+                  e.key === "Enter" && !isLoading && handleChatSubmit()
+                }
                 className="flex-1"
                 size={undefined}
+                disabled={isLoading}
               />
-              <Button size="sm" onClick={handleChatSubmit}>
-                <Search className="h-4 w-4" />
+              <Button
+                size="sm"
+                onClick={handleChatSubmit}
+                disabled={isLoading || !chatQuery.trim()}
+              >
+                {isLoading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                ) : (
+                  <Search className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </div>
