@@ -65,7 +65,7 @@ export function InvestigatorDashboard({
       </div>
 
       {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 p-4 bg-white rounded-xl border shadow-sm mt-4">
+      <div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl mt-4">
         <div className="flex-1 relative">
           <Search className="absolute left-4 top-[10px] text-muted-foreground h-4 w-4" />
           <Input
@@ -78,10 +78,10 @@ export function InvestigatorDashboard({
 
         <div className="flex gap-2">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-36 !h-10 rounded-xl">
+            <SelectTrigger className="w-36 !h-10 bg-card rounded-xl">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent className="bg-white">
+            <SelectContent className="bg-card">
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="Open">Open</SelectItem>
               <SelectItem value="In-Progress">In-Progress</SelectItem>
@@ -90,10 +90,10 @@ export function InvestigatorDashboard({
           </Select>
 
           <Select value={visibilityFilter} onValueChange={setVisibilityFilter}>
-            <SelectTrigger className="w-36 !h-10 rounded-xl">
+            <SelectTrigger className="w-36 !h-10 bg-card rounded-xl">
               <SelectValue placeholder="Visibility" />
             </SelectTrigger>
-            <SelectContent className="bg-white">
+            <SelectContent className="bg-card">
               <SelectItem value="all">All Cases</SelectItem>
               <SelectItem value="Public">Public</SelectItem>
               <SelectItem value="Private">Private</SelectItem>
