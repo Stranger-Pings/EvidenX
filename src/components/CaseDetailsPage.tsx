@@ -25,6 +25,7 @@ import EvidenceSummary from "./EvidenceSummary";
 import CaseProgressBadge from "./common/CaseProgressBadge";
 import CaseAccessBadge from "./common/CaseAccessBadge";
 import ChatPanel from "./chat/ChatPanel";
+import { useSendQueryMutation } from "@/store/globalChat.api";
 
 interface CaseDetailsPageProps {
   caseId: string;
@@ -61,6 +62,8 @@ export function CaseDetailsPage({
       audioTimestamps: [145, 670], // seconds in different audio files
     },
   ]);
+
+  const [sendQuery] = useSendQueryMutation();
 
   const case_: Case | undefined = mockCases.find((c) => c.id === caseId);
   const caseEvidence = mockEvidence.filter((e) => e.caseId === caseId);
@@ -151,8 +154,15 @@ export function CaseDetailsPage({
       });
   };
 
-  const handleChatSubmit = () => {
+  const handleChatSubmit = async () => {
     if (!chatQuery.trim()) return;
+
+    try {
+      const response = await sendQuery({ caseId, query: chatQuery }).unwrap();
+      console.log(response);
+    } catch (e) {
+      console.error(e);
+    }
 
     // Mock response
     const mockResponse =
