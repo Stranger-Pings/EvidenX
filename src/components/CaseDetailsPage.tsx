@@ -19,7 +19,6 @@ import {
   TrendingUp,
   MessageCircleMore,
 } from "lucide-react";
-import { mockCases, mockEvidence } from "../data/mockData";
 import { Case, Evidence } from "../types/case";
 import EvidenceSummary from "./EvidenceSummary";
 import CaseProgressBadge from "./common/CaseProgressBadge";
@@ -35,6 +34,7 @@ interface CaseDetailsPageProps {
   onViewAudio: (evidenceId: string) => void;
   onCompareAudios: (evidenceIds: string[]) => void;
   cases: any[];
+  selectedCase?: Case;
 }
 
 export function CaseDetailsPage({
@@ -44,7 +44,7 @@ export function CaseDetailsPage({
   onViewVideo,
   onViewAudio,
   onCompareAudios,
-  cases,
+  selectedCase,
 }: CaseDetailsPageProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEvidence, setSelectedEvidence] = useState<string[]>([]);
@@ -55,37 +55,23 @@ export function CaseDetailsPage({
   );
   const [currentVideoTitle, setCurrentVideoTitle] =
     useState<string>("Evidence Video");
-  const [chatHistory, setChatHistory] = useState([
-    {
-      query: "What time did the suspects enter the building?",
-      response:
-        "Based on CCTV analysis, two suspects entered at 02:32 AM through the main entrance. Video timestamp: 02:32:15",
-      videoTimestamp: 9135, // seconds
-    },
-    {
-      query: "Are there any contradictions in witness statements?",
-      response:
-        "Security guard mentions 2:30 AM while store owner suggests earlier timing. Audio evidence shows discrepancy in timeline accounts.",
-      audioTimestamps: [145, 670], // seconds in different audio files
-    },
-  ]);
 
-  const case_: Case | undefined = cases.find((c) => c.id === caseId);
-  const caseEvidence = mockEvidence.filter((e) => e.caseId === caseId);
+  const case_: Case | undefined = selectedCase;
+  const caseEvidence = case_?.evidence;
 
   if (!case_) {
     return <div>Case not found</div>;
   }
 
-  console.log(case_);
-  const filteredEvidence = caseEvidence.filter(
-    (evidence) =>
-      evidence.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      evidence.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      evidence.tags.some((tag) =>
-        tag.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-  );
+  const filteredEvidence =
+    caseEvidence?.filter(
+      (evidence) =>
+        evidence.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        evidence.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        evidence.tags.some((tag) =>
+          tag.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+    ) || [];
 
   const getEvidenceIcon = (type: Evidence["type"]) => {
     switch (type) {
@@ -128,7 +114,7 @@ export function CaseDetailsPage({
 
   const handleAnalyzeSelected = () => {
     const audioEvidence = selectedEvidence.filter((id) => {
-      const evidence = caseEvidence.find((e) => e.id === id);
+      const evidence = caseEvidence?.find((e) => e.id === id);
       return evidence?.type === "audio";
     });
     if (audioEvidence.length > 1) {
@@ -143,7 +129,7 @@ export function CaseDetailsPage({
 
   const getSelectedAudioCount = () => {
     return selectedEvidence.filter((id) => {
-      const evidence = caseEvidence.find((e) => e.id === id);
+      const evidence = caseEvidence?.find((e) => e.id === id);
       return evidence?.type === "audio";
     }).length;
   };
@@ -151,11 +137,11 @@ export function CaseDetailsPage({
   const getSelectedAudioNames = () => {
     return selectedEvidence
       .filter((id) => {
-        const evidence = caseEvidence.find((e) => e.id === id);
+        const evidence = caseEvidence?.find((e) => e.id === id);
         return evidence?.type === "audio";
       })
       .map((id) => {
-        const evidence = caseEvidence.find((e) => e.id === id);
+        const evidence = caseEvidence?.find((e) => e.id === id);
         return evidence?.name || id;
       });
   };
@@ -253,10 +239,10 @@ export function CaseDetailsPage({
                       </div>
                       <div>
                         <div className="text-sm text-muted-foreground mb-1">
-                          Description:
+                          Summary:
                         </div>
                         <p className="text-base leading-7 text-foreground">
-                          {case_.description}
+                          {case_.summary}
                         </p>
                       </div>
                     </CardContent>
@@ -264,7 +250,7 @@ export function CaseDetailsPage({
 
                   {/* Quick Stats */}
                   <div className="w-1/5">
-                    <EvidenceSummary evidence={caseEvidence} />
+                    <EvidenceSummary evidence={caseEvidence || []} />
                   </div>
                 </div>
               </TabsContent>
@@ -274,51 +260,59 @@ export function CaseDetailsPage({
                 className="mt-4 flex-1 flex flex-col"
               >
                 {/* Sticky Evidence Controls */}
-                <div className="flex justify-between items-center">
-                  <div className="flex gap-2">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                      <Input
-                        placeholder="Search evidence..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 w-64 h-10"
-                      />
-                    </div>
-                    <Button
-                      variant="outline"
-                      className="bg-card text-primary border !border-primary h-10 !hover:bg-none"
-                    >
-                      <Filter className="h-4 w-4 mr-2 text-primary" />
-                      Filter
-                    </Button>
-                  </div>
-                  <div className="flex gap-2">
-                    {selectedEvidence.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        {getSelectedAudioCount() > 1 && (
-                          <Button
-                            onClick={handleAnalyzeSelected}
-                            variant="default"
-                          >
-                            <Headphones className="h-4 w-4 mr-2" />
-                            Compare Audio ({getSelectedAudioCount()})
-                          </Button>
-                        )}
-                        {selectedEvidence.length > 0 &&
-                          getSelectedAudioCount() <= 1 && (
-                            <div className="text-sm text-muted-foreground">
-                              Select 2+ audio files to compare
-                            </div>
-                          )}
+                {caseEvidence && caseEvidence.length > 0 ? (
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-2">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                        <Input
+                          placeholder="Search evidence..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-10 w-64 h-10"
+                        />
                       </div>
-                    )}
-                    <Button>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload Evidence
-                    </Button>
+                      <Button
+                        variant="outline"
+                        className="bg-card text-primary border !border-primary h-10 !hover:bg-none"
+                      >
+                        <Filter className="h-4 w-4 mr-2 text-primary" />
+                        Filter
+                      </Button>
+                    </div>
+                    <div className="flex gap-2">
+                      {selectedEvidence.length > 0 && (
+                        <div className="flex items-center gap-2">
+                          {getSelectedAudioCount() > 1 && (
+                            <Button
+                              onClick={handleAnalyzeSelected}
+                              variant="default"
+                            >
+                              <Headphones className="h-4 w-4 mr-2" />
+                              Compare Audio ({getSelectedAudioCount()})
+                            </Button>
+                          )}
+                          {selectedEvidence.length > 0 &&
+                            getSelectedAudioCount() <= 1 && (
+                              <div className="text-sm text-muted-foreground">
+                                Select 2+ audio files to compare
+                              </div>
+                            )}
+                        </div>
+                      )}
+                      <Button>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Evidence
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center">
+                    <p className="text-muted-foreground">
+                      No evidence found for this case
+                    </p>
+                  </div>
+                )}
 
                 {/* Sticky Selection Summary */}
                 {selectedEvidence.length > 0 && (
@@ -360,7 +354,7 @@ export function CaseDetailsPage({
                 <div className="flex-1">
                   <div className="space-y-4">
                     {/* Evidence Grid */}
-                    {filteredEvidence.length > 0 && (
+                    {filteredEvidence?.length > 0 && (
                       <div className="pt-4">
                         <p className="text-sm text-muted-foreground">
                           💡 Click on evidence cards or checkboxes to select
@@ -369,7 +363,7 @@ export function CaseDetailsPage({
                       </div>
                     )}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {filteredEvidence.map((evidence) => (
+                      {filteredEvidence?.map((evidence) => (
                         <Card
                           key={evidence.id}
                           className={`hover-lift cursor-pointer flex flex-col h-full`}

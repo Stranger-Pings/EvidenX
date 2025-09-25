@@ -13,7 +13,7 @@ import CaseProgressBadge from "./common/CaseProgressBadge";
 
 interface CaseCardProps {
   case_: Case;
-  onCaseSelect: (caseId: string) => void;
+  onCaseSelect: (caseId: string, case_: Case) => void;
 }
 
 export function CaseCard({ case_, onCaseSelect }: CaseCardProps) {
@@ -76,7 +76,7 @@ export function CaseCard({ case_, onCaseSelect }: CaseCardProps) {
         <Button
           variant="secondary"
           className="w-full bg-blue-100 text-blue-700 hover:bg-blue-200"
-          onClick={() => onCaseSelect(case_.id)}
+          onClick={() => onCaseSelect(case_.id, case_)}
         >
           View Details
         </Button>

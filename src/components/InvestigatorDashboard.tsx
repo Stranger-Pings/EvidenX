@@ -11,9 +11,10 @@ import {
 import { Search, Plus } from "lucide-react";
 import { mockCases } from "../data/mockData";
 import { CaseCard } from "./CaseCard";
+import { Case } from "@/types/case";
 
 interface InvestigatorDashboardProps {
-  onCaseSelect: (caseId: string) => void;
+  onCaseSelect: (caseId: string, case_: Case) => void;
   onRegisterCase?: () => void;
   cases: any[];
   isLoading: boolean;

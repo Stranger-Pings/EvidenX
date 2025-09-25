@@ -8,6 +8,7 @@ import { AudioEvidenceProcessing } from "./components/AudioEvidenceProcessing";
 import { AudioComparison } from "./components/AudioComparison";
 import IncidentTimeline from "./components/IncidentTimeline";
 import { useGetCasesQuery } from "./store/cases.api";
+import { Case } from "./types/case";
 
 type ViewType =
   | "registration"
@@ -23,6 +24,7 @@ interface AppState {
   selectedCaseId?: string;
   selectedEvidenceId?: string;
   selectedAudioIds?: string[];
+  selectedCase?: Case;
 }
 export default function App() {
   const [appState, setAppState] = useState({
@@ -46,8 +48,8 @@ export default function App() {
     }));
   };
 
-  const handleCaseSelect = (caseId: string) => {
-    navigateTo("case-details", { selectedCaseId: caseId });
+  const handleCaseSelect = (caseId: string, case_: Case) => {
+    navigateTo("case-details", { selectedCaseId: caseId, selectedCase: case_ });
   };
 
   const handleViewTimeline = () => {
@@ -149,6 +151,7 @@ export default function App() {
                   onViewAudio={handleViewAudio}
                   onCompareAudios={handleCompareAudios}
                   cases={cases || []}
+                  selectedCase={appState.selectedCase}
                 />
               );
 
@@ -198,7 +201,6 @@ export default function App() {
                   caseId={appState.selectedCaseId}
                   onBack={handleBack}
                   onViewEvidence={handleViewEvidence}
-                  cases={cases || []}
                 />
               );
 
