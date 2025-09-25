@@ -4,7 +4,6 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { ScrollArea } from "./ui/scroll-area";
 import {
   ArrowLeft,
   Search,
@@ -15,7 +14,6 @@ import {
   Image,
   Video,
   Headphones,
-  MessageSquare,
   Download,
   Eye,
   TrendingUp,
@@ -27,6 +25,7 @@ import EvidenceSummary from "./EvidenceSummary";
 import CaseProgressBadge from "./common/CaseProgressBadge";
 import CaseAccessBadge from "./common/CaseAccessBadge";
 import { VideoPlayerPopup } from "./VideoPlayerPopup";
+import ChatPanel from "./chat/ChatPanel";
 
 interface CaseDetailsPageProps {
   caseId: string;
@@ -181,67 +180,12 @@ export function CaseDetailsPage({
       <div className="relative flex h-full bg-background">
         {/* Chat Panel */}
         {isChatPanelOpen && (
-          <div className="w-80 border-r bg-card flex flex-col h-full">
-            <div className="p-4 flex-shrink-0">
-              <h3 className="font-medium flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" />
-                AI Assistant
-              </h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                Query across all case evidence
-              </p>
-            </div>
-
-            <ScrollArea className="flex-1 p-4 min-h-0">
-              <div className="space-y-4">
-                {chatHistory.map((chat, index) => (
-                  <div key={index} className="space-y-2">
-                    <div className="bg-primary text-primary-foreground p-3 rounded-lg text-sm">
-                      {chat.query}
-                    </div>
-                    <div className="bg-muted p-3 rounded-lg text-sm">
-                      {chat.response}
-                      {chat.videoTimestamp && (
-                        <Button
-                          variant="link"
-                          size="sm"
-                          className="p-0 h-auto text-blue-400 underline mt-2"
-                          onClick={() => {
-                            setVideoTimestamp(chat.videoTimestamp);
-                            setCurrentVideoTitle(
-                              "CCTV Footage - Main Entrance"
-                            );
-                            setVideoPlayerOpen(true);
-                          }}
-                        >
-                          Jump to video ({Math.floor(chat.videoTimestamp / 60)}:
-                          {(chat.videoTimestamp % 60)
-                            .toString()
-                            .padStart(2, "0")}
-                          )
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-
-            <div className="p-4 border-t flex-shrink-0">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Ask about evidence..."
-                  value={chatQuery}
-                  onChange={(e) => setChatQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && handleChatSubmit()}
-                  className="flex-1"
-                />
-                <Button size="sm" onClick={handleChatSubmit}>
-                  Send
-                </Button>
-              </div>
-            </div>
-          </div>
+          <ChatPanel
+            chatHistory={chatHistory}
+            chatQuery={chatQuery}
+            onChatQueryChange={setChatQuery}
+            onSubmit={handleChatSubmit}
+          />
         )}
 
         {/* Main Content */}

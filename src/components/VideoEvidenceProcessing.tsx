@@ -64,7 +64,6 @@ export function VideoEvidenceProcessing({
   const [chatQuery, setChatQuery] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
 
-
   const HARDCODED_CHATS: ChatEntry[] = [
     {
       query: "Identify girl in pink top, wide leg blue jeans, white sneakers",
@@ -78,7 +77,8 @@ export function VideoEvidenceProcessing({
     },
     {
       query: "Show me all people wearing dark clothing",
-      response: "Detected 3 individuals in dark clothing at the following timestamps:",
+      response:
+        "Detected 3 individuals in dark clothing at the following timestamps:",
       timestamps: [120, 245, 380, 520],
     },
     {
@@ -107,9 +107,9 @@ export function VideoEvidenceProcessing({
       timestamps: [220, 380],
     },
   ];
-  
+
   const [chatHistory, setChatHistory] = useState<ChatEntry[]>([]);
-  
+
   const [detectedFlags, setDetectedFlags] = useState<
     { time: number; type: string; label: string; color: string }[]
   >([]);
@@ -236,16 +236,56 @@ export function VideoEvidenceProcessing({
 
   const handleChatSubmit = () => {
     if (!chatQuery.trim()) return;
-
-    const userQuery = chatQuery; // capture the current query
-    setChatHistory((prev) => [
-      ...prev,
-      { query: userQuery, response: "Thinking...", timestamps: [] },
-    ]);
+    const userQuery = chatQuery;
+    const nextIndex = chatHistory.length;
+    const predefined = HARDCODED_CHATS[nextIndex];
+    if (predefined) {
+      setChatHistory((prev) => [...prev, predefined]);
+      // When a predefined result is appended, surface its timestamps as flags
+      // Color palette for different messages
+      const colorPalette = [
+        "bg-red-500", // First message - red
+        "bg-orange-500", // Second message - orange
+        "bg-blue-500", // Third message - blue
+        "bg-green-500", // Fourth message - green
+        "bg-purple-500", // Fifth message - purple
+        "bg-pink-500", // Sixth message - pink
+        "bg-yellow-500", // Seventh message - yellow
+        "bg-indigo-500", // Eighth message - indigo
+        "bg-teal-500", // Ninth message - teal
+        "bg-cyan-500", // Tenth message - cyan
+      ];
+      const color = colorPalette[nextIndex] || "bg-gray-500";
+      const label = `Result ${nextIndex + 1}`;
+      const newFlags = predefined.timestamps.map((t) => ({
+        time: t,
+        type: "person",
+        label,
+        color,
+      }));
+      setDetectedFlags((prev) =>
+        [...prev, ...newFlags]
+          .sort((a, b) => a.time - b.time)
+          .filter(
+            (flag, idx, arr) =>
+              arr.findIndex(
+                (f) => f.time === flag.time && f.color === flag.color
+              ) === idx
+          )
+      );
+    } else {
+      // Optional: append a simple echo if more queries are made
+      setChatHistory((prev) => [
+        ...prev,
+        {
+          query: chatQuery,
+          response: "No preset result for this query.",
+          timestamps: [],
+        },
+      ]);
+    }
     setChatQuery("");
     setIsChatLoading(true);
-
-    const nextIndex = chatHistory.length;
 
     setTimeout(() => {
       setIsChatLoading(false);
@@ -419,8 +459,11 @@ export function VideoEvidenceProcessing({
 
         {/* Video Content */}
         <div className="flex-1 flex flex-col p-4 pb-0">
-            {/* Video Player */}
-            <div className="bg-black rounded-lg relative overflow-hidden h-[60vh] mb-6" ref={containerRef}>
+          {/* Video Player */}
+          <div
+            className="bg-black rounded-lg relative overflow-hidden h-[60vh] mb-6"
+            ref={containerRef}
+          >
             <video
               ref={videoRef}
               src={"https://evidenx.s3.us-east-1.amazonaws.com/CCTV_Master.mp4"}
@@ -517,8 +560,8 @@ export function VideoEvidenceProcessing({
             </div>
           </div>
 
-            {/* Video Controls */}
-            <div className="space-y-2 mt-4 mb-0">
+          {/* Video Controls */}
+          <div className="space-y-2 mt-4 mb-0">
             {/* Timeline with slider and flags */}
             <div className="relative ml-4 mt-2">
               <Slider
