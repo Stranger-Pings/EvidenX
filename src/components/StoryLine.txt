@@ -1,0 +1,30 @@
+Unidentified Person Track (Black hoodie -> Major Suspect):
+09-10-2025 Wed 11:42: Interacts with Guard Manoj at main entrance.
+09-10-2025 Wed 11:52: Interacts with Ananya near the main entrance.
+09-10-2025 Wed 11:56: Exits main entrance with Ananya.
+
+Guard Manoj Track (Security Guard -> Witness):
+09-10-2025 Wed 11:30-11:55: On duty near the main entrance.
+09-10-2025 Wed 11:42: Interacts with Unidentified Person (ID inquiry). No ID Found with him.
+
+Ananya Sharma Track (Missing person -> Victim):
+09-10-2025 Wed 11:37: Enters Recreational Room (with Rohan, Sameer).
+09-10-2025 Wed 11:37-11:44: Chatted with colleagues.
+09-10-2025 Wed 11:44: Leaves Recreational Room.
+09-10-2025 Wed 11:52: Interacts with Unidentified Person.
+09-10-2025 Wed 11:56: Anxious Traits shown and Exits the main entrance with the Unidentified Person.
+
+Colleagues Group Track (Sameer, Jacob, Anuj -> Witness):
+09-10-2025 Wed 11:37: Sameer enters the Recreational Room (with Ananya, Rohan).
+09-10-2025 Wed 11:39: Anuj enters the Recreational Room.
+09-10-2025 Wed 11:35-11:44: All in the Recreational Room/Leaving.
+09-10-2025 Wed 11:44: Leave Recreational Room, turn towards desks (separate from Ananya).
+
+Rohan Mehra Track (Grey T-shirt -> Witness):
+09-10-2025 Wed 11:37: Enters Recreational Room (with Ananya, Sameer).
+09-10-2025 Wed 11:41: Leaves Recreational Room, towards elevators.
+
+Washroom Area Track (Lena, Mrs. Devi -> Witness):
+09-10-2025 Wed 11:46: Lena Roy enters the washroom corridor, finds the washroom empty.
+09-10-2025 Wed 11:50: Mrs. Devi (cleaner) enters the washroom corridor, finds the washroom empty.
+

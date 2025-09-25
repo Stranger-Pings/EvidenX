@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { ScrollArea } from "./ui/scroll-area";
 import { Badge } from "./ui/badge";
 import { Slider } from "./ui/slider";
 import {
@@ -61,7 +60,6 @@ export function VideoEvidenceProcessing({
     height: number;
   }>({ width: 0, height: 0 });
   const [chatQuery, setChatQuery] = useState("");
-  const [chatHistory, setChatHistory] = useState<ChatEntry[]>([]);
 
   const HARDCODED_CHATS: ChatEntry[] = [
     {
@@ -74,7 +72,40 @@ export function VideoEvidenceProcessing({
       response: "Seems like she left at 11:14:15",
       timestamps: [812],
     },
+    {
+      query: "Show me all people wearing dark clothing",
+      response: "Detected 3 individuals in dark clothing at the following timestamps:",
+      timestamps: [120, 245, 380, 520],
+    },
+    {
+      query: "Find any suspicious activity near the entrance",
+      response: "Detected unusual movement patterns at these times:",
+      timestamps: [150, 300, 450],
+    },
+    {
+      query: "Identify anyone carrying bags or packages",
+      response: "Found 2 individuals with bags at these timestamps:",
+      timestamps: [200, 350, 500],
+    },
+    {
+      query: "Show me all vehicles in the parking area",
+      response: "Detected 4 vehicles entering and exiting:",
+      timestamps: [100, 250, 400, 550],
+    },
+    {
+      query: "Find any interactions between people",
+      response: "Detected 5 interaction events:",
+      timestamps: [180, 320, 420, 480, 600],
+    },
+    {
+      query: "Show me anyone looking at the camera",
+      response: "Found 2 instances of people looking directly at camera:",
+      timestamps: [220, 380],
+    },
   ];
+  
+  const [chatHistory, setChatHistory] = useState<ChatEntry[]>([]);
+  
   const [detectedFlags, setDetectedFlags] = useState<
     { time: number; type: string; label: string; color: string }[]
   >([]);
@@ -203,8 +234,21 @@ export function VideoEvidenceProcessing({
     if (predefined) {
       setChatHistory((prev) => [...prev, predefined]);
       // When a predefined result is appended, surface its timestamps as flags
-      const color = nextIndex === 0 ? "bg-red-500" : "bg-orange-500";
-      const label = nextIndex === 0 ? "Result 1" : "Result 2";
+      // Color palette for different messages
+      const colorPalette = [
+        "bg-red-500",      // First message - red
+        "bg-orange-500",    // Second message - orange  
+        "bg-blue-500",      // Third message - blue
+        "bg-green-500",     // Fourth message - green
+        "bg-purple-500",    // Fifth message - purple
+        "bg-pink-500",      // Sixth message - pink
+        "bg-yellow-500",    // Seventh message - yellow
+        "bg-indigo-500",    // Eighth message - indigo
+        "bg-teal-500",      // Ninth message - teal
+        "bg-cyan-500",      // Tenth message - cyan
+      ];
+      const color = colorPalette[nextIndex] || "bg-gray-500";
+      const label = `Result ${nextIndex + 1}`;
       const newFlags = predefined.timestamps.map((t) => ({
         time: t,
         type: "person",
@@ -256,7 +300,7 @@ export function VideoEvidenceProcessing({
           </p>
         </div>
 
-        <ScrollArea className="flex-1 p-4">
+        <div className="flex-1 p-4 overflow-y-auto">
           <div className="space-y-4">
             {chatHistory.map((chat, index) => (
               <div key={index} className="space-y-2">
@@ -282,9 +326,9 @@ export function VideoEvidenceProcessing({
               </div>
             ))}
           </div>
-        </ScrollArea>
+        </div>
 
-        <div className="p-4 border-t space-y-3">
+        <div className="p-4 border-t space-y-3 flex-shrink-0">
           {/* Image Upload */}
           <div>
             <label className="text-sm font-medium mb-2 block">
@@ -326,9 +370,9 @@ export function VideoEvidenceProcessing({
       </div>
 
       {/* Video Player Area */}
-      <div className="flex-1 flex flex-col  bg-card rounded-lg overflow-y-auto">
+      <div className="flex-1 flex flex-col bg-card rounded-lg">
         {/* Header */}
-        <div className="border-b p-4 flex-shrink-0">
+        <div className="border-b p-4">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" onClick={onBack}>
               <ArrowLeft className="h-4 w-4" />
@@ -343,9 +387,10 @@ export function VideoEvidenceProcessing({
           </div>
         </div>
 
-        {/* Video Player */}
-        <div className="flex-1 flex flex-col p-4 overflow-hidden">
-          <div className="flex-1 bg-black rounded-lg relative overflow-hidden mb-4 min-h-[70vh]" ref={containerRef}>
+        {/* Video Content */}
+        <div className="flex-1 flex flex-col p-4 pb-0">
+            {/* Video Player */}
+            <div className="bg-black rounded-lg relative overflow-hidden h-[60vh] mb-6" ref={containerRef}>
             <video
               ref={videoRef}
               src={
@@ -416,8 +461,8 @@ export function VideoEvidenceProcessing({
             </div>
           </div>
 
-          {/* Video Controls */}
-          <div className="space-y-4 flex-shrink-0 overflow-y-auto">
+            {/* Video Controls */}
+            <div className="space-y-2 mt-4 mb-0">
             {/* Timeline with slider and flags */}
             <div className="relative ml-4 mt-2">
               <Slider
@@ -490,9 +535,6 @@ export function VideoEvidenceProcessing({
                 <ImageIcon className="h-4 w-4" />
               </Button>
             </div>
-
-            {/* Detection Summary */}
-
           </div>
         </div>
       </div>

@@ -136,9 +136,7 @@ speaker_0: "thank you your information will help us investigating further"`
             <Button variant="ghost" size="sm" onClick={onBack}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            {/* <h1 className="text-3xl font-bold bg-gradient-to-r from-audio-primary to-audio-secondary bg-clip-text text-transparent">
-                Audio Comparison Analysis
-              </h1> */}
+
             <div className="flex-1">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-audio-primary to-audio-secondary bg-clip-text text-transparent">
                 {evidence.name}

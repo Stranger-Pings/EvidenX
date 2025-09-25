@@ -60,13 +60,232 @@ interface IncidentTimelineProps {
 const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ onBack }) => {
     const [selectedView, setSelectedView] = useState<"timeline" | "month">("timeline");
     const [selectedDate, setSelectedDate] = useState<DateInfo | null>(null); // null means show all incidents
-    const [currentMonth, setCurrentMonth] = useState<number>(3); // March
+    const [currentMonth, setCurrentMonth] = useState<number>(10); // October
     const [currentYear, setCurrentYear] = useState<number>(2025);
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
     const [timeRange] = useState<TimeRange>({ start: 0, end: 24 });
 
-    // Mock investigation data
+    // Mock investigation data based on StoryLine.txt
     const caseData: CaseData = {
+        title: "Case #2025-1009: Missing Person - Ananya Sharma Investigation",
+        timeframe: "October 9, 2025 - 11:30 to 12:00",
+        actors: [
+            { id: "suspect1", name: "Unidentified Person (Black Hoodie)", color: "#ef4444", type: "suspect" },
+            { id: "victim1", name: "Ananya Sharma", color: "#3b82f6", type: "victim" },
+            { id: "witness1", name: "Guard Manoj", color: "#10b981", type: "witness" },
+            { id: "witness2", name: "Rohan Mehra", color: "#059669", type: "witness" },
+            { id: "witness3", name: "Sameer", color: "#16a34a", type: "witness" },
+            { id: "witness4", name: "Anuj", color: "#15803d", type: "witness" },
+            { id: "witness5", name: "Lena Roy", color: "#0d9488", type: "witness" },
+            { id: "witness6", name: "Mrs. Devi (Cleaner)", color: "#0891b2", type: "witness" }
+        ],
+        incidentDates: [
+            { day: 9, month: 10 }, // October 9
+        ],
+        events: [
+            // Guard Manoj on duty
+            {
+                id: 1,
+                time: 11.5, // 11:30
+                duration: 0.2,
+                actor: "witness1",
+                date: { day: 9, month: 10 },
+                title: "Guard begins duty at main entrance",
+                type: "video",
+                confidence: 95,
+                evidence: "CCTV Camera #1 - Main Entrance",
+                description: "Guard Manoj starts duty near the main entrance area",
+            },
+            // Colleagues enter recreational room
+            {
+                id: 2,
+                time: 11.62, // 11:37
+                duration: 0.08,
+                actor: "victim1",
+                date: { day: 9, month: 10 },
+                title: "Ananya enters Recreational Room",
+                type: "video",
+                confidence: 98,
+                evidence: "CCTV Camera #3 - Recreational Area",
+                description: "Ananya Sharma enters recreational room with Rohan and Sameer",
+            },
+            {
+                id: 3,
+                time: 11.62, // 11:37
+                duration: 0.08,
+                actor: "witness2",
+                date: { day: 9, month: 10 },
+                title: "Rohan enters Recreational Room",
+                type: "video",
+                confidence: 95,
+                evidence: "CCTV Camera #3 - Recreational Area",
+                description: "Rohan Mehra (Grey T-shirt) enters with Ananya and Sameer",
+            },
+            {
+                id: 4,
+                time: 11.62, // 11:37
+                duration: 0.08,
+                actor: "witness3",
+                date: { day: 9, month: 10 },
+                title: "Sameer enters Recreational Room",
+                type: "video",
+                confidence: 95,
+                evidence: "CCTV Camera #3 - Recreational Area",
+                description: "Sameer enters recreational room with colleagues",
+            },
+            {
+                id: 5,
+                time: 11.65, // 11:39
+                duration: 0.05,
+                actor: "witness4",
+                date: { day: 9, month: 10 },
+                title: "Anuj joins in Recreational Room",
+                type: "video",
+                confidence: 92,
+                evidence: "CCTV Camera #3 - Recreational Area",
+                description: "Anuj enters the recreational room",
+            },
+            // Rohan leaves early
+            {
+                id: 6,
+                time: 11.68, // 11:41
+                duration: 0.05,
+                actor: "witness2",
+                date: { day: 9, month: 10 },
+                title: "Rohan leaves towards elevators",
+                type: "video",
+                confidence: 90,
+                evidence: "CCTV Camera #4 - Elevator Area",
+                description: "Rohan Mehra leaves recreational room and heads to elevators",
+            },
+            // Suspect interaction with guard
+            {
+                id: 7,
+                time: 11.7, // 11:42
+                duration: 0.1,
+                actor: "suspect1",
+                date: { day: 9, month: 10 },
+                title: "Unidentified person interacts with guard",
+                type: "video",
+                confidence: 85,
+                evidence: "CCTV Camera #1 - Main Entrance",
+                description: "Person in black hoodie approaches Guard Manoj for ID inquiry - no ID found",
+            },
+            {
+                id: 8,
+                time: 11.7, // 11:42
+                duration: 0.1,
+                actor: "witness1",
+                date: { day: 9, month: 10 },
+                title: "Guard conducts ID check",
+                type: "witness",
+                confidence: 100,
+                evidence: "Guard Statement #1",
+                description: "Guard Manoj questions unidentified person about ID - person has no identification",
+            },
+            // Ananya and colleagues leave recreational room
+            {
+                id: 9,
+                time: 11.73, // 11:44
+                duration: 0.05,
+                actor: "victim1",
+                date: { day: 9, month: 10 },
+                title: "Ananya leaves Recreational Room",
+                type: "video",
+                confidence: 95,
+                evidence: "CCTV Camera #3 - Recreational Area",
+                description: "Ananya Sharma exits recreational room separately from colleagues",
+            },
+            {
+                id: 10,
+                time: 11.73, // 11:44
+                duration: 0.05,
+                actor: "witness3",
+                date: { day: 9, month: 10 },
+                title: "Colleagues leave towards desks",
+                type: "video",
+                confidence: 88,
+                evidence: "CCTV Camera #5 - Office Area",
+                description: "Sameer, Anuj and others leave recreational room towards their desks",
+            },
+            // Washroom area checks
+            {
+                id: 11,
+                time: 11.77, // 11:46
+                duration: 0.08,
+                actor: "witness5",
+                date: { day: 9, month: 10 },
+                title: "Lena checks washroom corridor",
+                type: "video",
+                confidence: 82,
+                evidence: "CCTV Camera #6 - Washroom Corridor",
+                description: "Lena Roy enters washroom corridor, finds it empty",
+            },
+            {
+                id: 12,
+                time: 11.83, // 11:50
+                duration: 0.08,
+                actor: "witness6",
+                date: { day: 9, month: 10 },
+                title: "Cleaner checks washroom area",
+                type: "video",
+                confidence: 85,
+                evidence: "CCTV Camera #6 - Washroom Corridor",
+                description: "Mrs. Devi (cleaner) enters washroom corridor, finds it empty",
+            },
+            // Critical interaction between suspect and victim
+            {
+                id: 13,
+                time: 11.87, // 11:52
+                duration: 0.07,
+                actor: "suspect1",
+                date: { day: 9, month: 10 },
+                title: "Suspect approaches Ananya",
+                type: "video",
+                confidence: 90,
+                evidence: "CCTV Camera #1 - Main Entrance",
+                description: "Unidentified person in black hoodie interacts with Ananya near main entrance",
+            },
+            {
+                id: 14,
+                time: 11.87, // 11:52
+                duration: 0.07,
+                actor: "victim1",
+                date: { day: 9, month: 10 },
+                title: "Ananya interacts with suspect",
+                type: "video",
+                confidence: 92,
+                evidence: "CCTV Camera #1 - Main Entrance",
+                description: "Ananya Sharma engages in conversation with unidentified person",
+            },
+            // Final exit - critical moment
+            {
+                id: 15,
+                time: 11.93, // 11:56
+                duration: 0.12,
+                actor: "victim1",
+                date: { day: 9, month: 10 },
+                title: "Ananya shows anxious behavior and exits",
+                type: "video",
+                confidence: 95,
+                evidence: "CCTV Camera #1 - Main Entrance",
+                description: "Ananya displays anxious traits and exits main entrance with unidentified person - LAST SEEN",
+            },
+            {
+                id: 16,
+                time: 11.93, // 11:56
+                duration: 0.12,
+                actor: "suspect1",
+                date: { day: 9, month: 10 },
+                title: "Suspect exits with victim",
+                type: "video",
+                confidence: 88,
+                evidence: "CCTV Camera #1 - Main Entrance",
+                description: "Unidentified person in black hoodie leaves premises with Ananya Sharma",
+            },
+        ],
+    };
+    /* const caseData: CaseData = {
         title: "Case #2025-0324: Downtown Bank Robbery Investigation",
         timeframe: "March 28 - April 2, 2025",
         actors: [
@@ -281,7 +500,7 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ onBack }) => {
                 description: "Red sedan found abandoned, forensic team deployed",
             },
         ],
-    };
+    };*/
     /* ,
       connections: [
         { from: 1, to: 3, type: 'sequence', strength: 'strong' },
@@ -377,12 +596,12 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ onBack }) => {
                     <div>
                         {selectedDate ? (
                             <p className="text-sm text-slate-600">
-                                {selectedDate.month === 3 ? "March" : "April"}{" "}
+                                {selectedDate.month === 10 ? "October" : "Month"}{" "}
                                 {selectedDate.day}, 2025 - Events for this day
                             </p>
                         ) : (
                             <p className="text-sm text-slate-600">
-                                {currentMonth === 3 ? "March" : currentMonth === 4 ? "April" : "Month"} {currentYear} - All incidents for this month
+                                {currentMonth === 10 ? "October" : "Month"} {currentYear} - All incidents for this month
                             </p>
                         )}
                     </div>
@@ -454,14 +673,14 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ onBack }) => {
                                     </button>
                                     <button
                                         onClick={() => {
-                                            if (currentMonth === 3) {
-                                                setCurrentMonth(2);
+                                            if (currentMonth === 10) {
+                                                setCurrentMonth(9);
                                             } else {
                                                 setCurrentMonth(currentMonth - 1);
                                             }
                                         }}
-                                        disabled={currentMonth === 3}
-                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium ${currentMonth === 3
+                                        disabled={currentMonth === 10}
+                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium ${currentMonth === 10
                                                 ? "bg-slate-200 text-slate-400 cursor-not-allowed"
                                                 : "bg-blue-700 text-white hover:bg-blue-800"
                                             }`}
@@ -470,14 +689,14 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ onBack }) => {
                                     </button>
                                     <button
                                         onClick={() => {
-                                            if (currentMonth === 4) {
-                                                setCurrentMonth(5);
+                                            if (currentMonth === 10) {
+                                                setCurrentMonth(11);
                                             } else {
                                                 setCurrentMonth(currentMonth + 1);
                                             }
                                         }}
-                                        disabled={currentMonth === 4}
-                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium ${currentMonth === 4
+                                        disabled={currentMonth === 10}
+                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium ${currentMonth === 10
                                                 ? "bg-slate-200 text-slate-400 cursor-not-allowed"
                                                 : "bg-blue-700 text-white hover:bg-blue-800"
                                             }`}
@@ -502,7 +721,7 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ onBack }) => {
                 {/* Time axis - only show when viewing specific date */}
                  {selectedDate && (
                      <div className="sticky top-0 bg-white pb-4 mb-4 flex">
-                         <div className="w-32 flex-shrink-0 p-3 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-300 rounded-l-lg sticky left-0 z-10">
+                         <div className="w-40 flex-shrink-0 p-3 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-300 rounded-l-lg sticky left-0 z-10">
                              Time (Hours)
                          </div>
                          <div className="relative h-12 bg-slate-50 border-t border-r border-b border-slate-300 rounded-r-lg flex-1">
@@ -543,7 +762,7 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ onBack }) => {
                                 }`}
                         >
                             <div
-                                className={`w-32 flex-shrink-0 p-3 text-sm font-medium sticky left-0 bg-white z-10 border-r border-slate-200 ${actor.type === "victim"
+                                className={`w-40 flex-shrink-0 p-3 text-sm font-medium sticky left-0 bg-white z-10 border-r border-slate-200 ${actor.type === "victim"
                                     ? "bg-amber-50 border-amber-200"
                                     : ""
                                     }`}
@@ -552,13 +771,13 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ onBack }) => {
                                 <div className="flex flex-col h-full justify-between">
                                     <div className="flex items-center gap-2">
                                         <div
-                                            className={`w-4 h-4 rounded-full ${actor.type === "victim"
+                                            className={`w-4 h-4 rounded-full flex-shrink-0 ${actor.type === "victim"
                                                 ? "ring-2 ring-amber-400 ring-offset-1"
                                                 : ""
                                                 }`}
                                             style={{ backgroundColor: actor.color }}
                                         ></div>
-                                        {actor.name}
+                                        <span>{actor.name}</span>
                                     </div>
                                     {actor.type === "victim" && (
                                         <span className="text-xs bg-amber-200 text-amber-800 px-2 py-1 rounded-full font-medium self-start">
@@ -618,7 +837,7 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ onBack }) => {
                                             </div>
                                             {!selectedDate && (
                                                 <div className="text-xs text-blue-700 font-medium mb-1">
-                                                    {event.date.month === 3 ? 'Mar' : 'Apr'} {event.date.day}
+                                                    {event.date.month === 10 ? 'Oct' : 'Month'} {event.date.day}
                                                 </div>
                                             )}
                                             <div className="text-xs leading-tight truncate mb-1">
@@ -880,7 +1099,7 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ onBack }) => {
                                             Date & Time
                                         </h4>
                                         <p className="text-sm text-gray-600">
-                                            {selectedEvent.date.month === 3 ? 'March' : 'April'} {selectedEvent.date.day}, 2025 at {formatTime(selectedEvent.time)}
+                                            {selectedEvent.date.month === 10 ? 'October' : 'Month'} {selectedEvent.date.day}, 2025 at {formatTime(selectedEvent.time)}
                                         </p>
                                     </div>
 
