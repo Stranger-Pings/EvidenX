@@ -5,7 +5,6 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import {
-  ArrowLeft,
   Search,
   Filter,
   Upload,
@@ -26,6 +25,8 @@ import CaseProgressBadge from "./common/CaseProgressBadge";
 import CaseAccessBadge from "./common/CaseAccessBadge";
 import { VideoPlayerPopup } from "./VideoPlayerPopup";
 import ChatPanel from "./chat/ChatPanel";
+import BackButton from "./common/BackButton";
+import GradientHeader from "./common/GradientHeader";
 
 interface CaseDetailsPageProps {
   caseId: string;
@@ -189,45 +190,37 @@ export function CaseDetailsPage({
         )}
 
         {/* Main Content */}
-        <div className="flex-1 flex px-6 flex-col h-full overflow-y-auto">
+        <div className="flex-1 flex p-6 pt-8 flex-col h-full overflow-y-auto bg-background">
           {/* Header */}
-          <div className="sticky top-0 z-10 bg-background pb-4">
-            <div className="p-6 flex-shrink-0 bg-muted/20">
-              <div className="flex items-center gap-4">
-                <ArrowLeft className="h-8 w-8" onClick={onBack} />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h1 className="text-2xl font-semibold tracking-tight">
-                      {case_.title}
-                    </h1>
-
+          <div className="bg-background pb-4">
+            <BackButton onBack={onBack} location="Cases" />
+            <div className="flex gap-4 items-baseline">
+              <div className="flex-1">
+                <div className="flex flex-col gap-2 mb-1">
+                  <GradientHeader title={case_.title} />
+                  <div className="flex gap-2 mt-3">
                     <CaseProgressBadge progress={case_.status} />
                     <CaseAccessBadge visibility={case_.visibility} />
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {case_.firNumber} • Registered:{" "}
-                    {new Date(case_.registeredDate).toLocaleDateString()}
-                  </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  {selectedEvidence.length > 0 && (
-                    <Badge variant="outline" className="mr-2">
-                      {selectedEvidence.length} selected
-                    </Badge>
-                  )}
-                  <Button
-                    onClick={onViewTimeline}
-                    className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    View Timeline
-                  </Button>
-                </div>
+                {/* <p className="text-sm text-muted-foreground">
+                  {case_.firNumber} • Registered:{" "}
+                  {new Date(case_.registeredDate).toLocaleDateString()}
+                </p> */}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={onViewTimeline}
+                  className="rounded-md bg-primary text-primary-foreground"
+                >
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  View Timeline
+                </Button>
               </div>
             </div>
           </div>
           {/* Content Tabs */}
-          <div className="flex-1 p-4">
+          <div className="flex-1 py-4">
             <Tabs defaultValue="overview" className="h-full flex flex-col">
               <div className="border-b">
                 <TabsList className="flex items-center gap-6 bg-transparent rounded-none p-0">
@@ -296,7 +289,7 @@ export function CaseDetailsPage({
                 className="mt-4 flex-1 flex flex-col"
               >
                 {/* Sticky Evidence Controls */}
-                <div className="flex justify-between items-center">
+                <div className="flex gap-3 justify-end items-center">
                   <div className="flex gap-2">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -307,39 +300,19 @@ export function CaseDetailsPage({
                         className="pl-10 w-64 h-10"
                       />
                     </div>
-                    <Button
+                    {/* <Button
                       variant="outline"
                       className="bg-card text-primary border !border-primary h-10 !hover:bg-none"
                     >
                       <Filter className="h-4 w-4 mr-2 text-primary" />
                       Filter
-                    </Button>
+                    </Button> */}
                   </div>
-                  <div className="flex gap-2">
-                    {selectedEvidence.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        {getSelectedAudioCount() > 1 && (
-                          <Button
-                            onClick={handleAnalyzeSelected}
-                            variant="default"
-                          >
-                            <Headphones className="h-4 w-4 mr-2" />
-                            Analyse Audio ({getSelectedAudioCount()})
-                          </Button>
-                        )}
-                        {selectedEvidence.length > 0 &&
-                          getSelectedAudioCount() <= 1 && (
-                            <div className="text-sm text-muted-foreground">
-                              Select 2+ audio files to compare
-                            </div>
-                          )}
-                      </div>
-                    )}
-                    <Button>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload Evidence
-                    </Button>
-                  </div>
+
+                  <Button>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Evidence
+                  </Button>
                 </div>
 
                 {/* Sticky Selection Summary */}
@@ -347,31 +320,46 @@ export function CaseDetailsPage({
                   <div className="bg-background pt-4">
                     <Card className="">
                       <CardContent className="!py-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">
-                              {selectedEvidence.length} item
-                              {selectedEvidence.length !== 1 ? "s" : ""}{" "}
-                              selected
-                            </span>
-                            {getSelectedAudioCount() > 0 && (
-                              <Badge variant="secondary" className="ml-2">
-                                {getSelectedAudioCount()} audio file
-                                {getSelectedAudioCount() !== 1 ? "s" : ""}
-                              </Badge>
-                            )}
+                        <div className="flex justify-between items-baseline">
+                          <div>
+                            <div className="flex flex-col gap-2 justify-between mb-2">
+                              <span className="text-md font-medium">
+                                {selectedEvidence.length} item
+                                {selectedEvidence.length !== 1 ? "s" : ""}{" "}
+                                selected
+                              </span>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                              {getSelectedAudioNames().map((name, index) => (
+                                <div
+                                  key={index}
+                                  className="text-sm flex text-center items-center gap-2"
+                                >
+                                  <Headphones className="h-4 w-4" />
+                                  {name}
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                          <div className="flex gap-2">
-                            {getSelectedAudioNames().map((name, index) => (
-                              <Badge
-                                key={index}
-                                variant="outline"
-                                className="text-xs"
-                              >
-                                {name}
-                              </Badge>
-                            ))}
-                          </div>
+                          {selectedEvidence.length > 0 && (
+                            <div className="flex items-center gap-2">
+                              {getSelectedAudioCount() > 1 && (
+                                <Button
+                                  onClick={handleAnalyzeSelected}
+                                  variant="default"
+                                >
+                                  <Headphones className="h-4 w-4 mr-2" />
+                                  Analyse Audio ({getSelectedAudioCount()})
+                                </Button>
+                              )}
+                              {selectedEvidence.length > 0 &&
+                                getSelectedAudioCount() <= 1 && (
+                                  <div className="text-sm text-muted-foreground">
+                                    Select 2+ audio files to compare
+                                  </div>
+                                )}
+                            </div>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -390,7 +378,7 @@ export function CaseDetailsPage({
                         </p>
                       </div>
                     )}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {filteredEvidence.map((evidence) => (
                         <Card
                           key={evidence.id}
@@ -403,14 +391,6 @@ export function CaseDetailsPage({
                                 <span className="font-medium text-sm">
                                   {evidence.type}
                                 </span>
-                                {selectedEvidence.includes(evidence.id) && (
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
-                                    Selected
-                                  </Badge>
-                                )}
                               </div>
                               {evidence.type === "audio" && (
                                 <input
@@ -482,8 +462,7 @@ export function CaseDetailsPage({
                                 {evidence.tags.slice(0, 3).map((tag) => (
                                   <Badge
                                     key={tag}
-                                    variant="secondary"
-                                    className="text-xs"
+                                    className="text-xs text-primary bg-blue-50"
                                   >
                                     {tag}
                                   </Badge>
@@ -497,7 +476,7 @@ export function CaseDetailsPage({
                                   <Button
                                     size="sm"
                                     variant="secondary"
-                                    className="w-full bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                    className="w-full bg-secondary text-card"
                                     onClick={(e: {
                                       stopPropagation: () => void;
                                     }) => {
@@ -513,7 +492,7 @@ export function CaseDetailsPage({
                                   <Button
                                     size="sm"
                                     variant="secondary"
-                                    className="w-full bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                    className="w-full bg-secondary text-card"
                                     onClick={(e: {
                                       stopPropagation: () => void;
                                     }) => {
@@ -529,7 +508,7 @@ export function CaseDetailsPage({
                                   <Button
                                     size="sm"
                                     variant="secondary"
-                                    className="w-full bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                    className="w-full bg-secondary text-card"
                                     onClick={(e: {
                                       stopPropagation: () => void;
                                     }) => {

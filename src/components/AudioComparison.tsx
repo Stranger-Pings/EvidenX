@@ -24,13 +24,17 @@ import {
   ChevronRight,
   Headphones,
   Eye,
-  
   Users,
   TrendingUp,
-  
+  Clock,
 } from "lucide-react";
-import { dataValuesEvidence, dataValuesAudioComparisons } from "../data/dataValues";
+import {
+  dataValuesEvidence,
+  dataValuesAudioComparisons,
+} from "../data/dataValues";
 import { Evidence, type AudioComparison } from "../types/case";
+import BackButton from "./common/BackButton";
+import GradientHeader from "./common/GradientHeader";
 
 interface AudioComparisonProps {
   evidenceIds: string[];
@@ -200,75 +204,60 @@ export function AudioComparison({
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="bg-background flex flex-col">
       {/* Header */}
-      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10 flex-shrink-0">
-        <div className="container mx-auto px-6 py-6">
+      <div className="p-6 pt-8 border-b">
+        <BackButton onBack={onBack} location="Case" />
+        <div className="bg-card/50 flex-shrink-0">
           <div className="flex items-center gap-4 mb-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onBack}
-              className="shrink-0"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
             <div className="flex-1">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-audio-primary to-audio-secondary bg-clip-text text-transparent">
-                Audio Comparison Analysis
-              </h1>
-              <p className="text-muted-foreground mt-1">
+              <GradientHeader title="Audio Comparison Analysis" />
+              <p className="text-muted-foreground mt-1 text-base">
                 Comprehensive analysis of {allWitnesses.length} witness
                 testimonies
               </p>
             </div>
-            <div className="flex gap-2">
-              <Badge variant="outline" className="flex items-center gap-1">
-                <Headphones className="h-3 w-3" />
+            <div className="flex flex-col gap-2">
+              <div className="flex text-sm items-center gap-1">
+                <Headphones className="h-4 w-4" />
                 {audioEvidence.length} Files
-              </Badge>
-              <Badge variant="outline" className="flex items-center gap-1">
-                <Users className="h-3 w-3" />
+              </div>
+              <div className="flex text-sm items-center gap-1">
+                <Users className="h-4 w-4" />
                 {allWitnesses.length} Witnesses
-              </Badge>
+              </div>
             </div>
           </div>
+        </div>
 
-          {/* Audio Files */}
-          <div className="flex gap-2 flex-wrap">
-            {audioEvidence.map((audio, index) => (
-              <div key={audio.id} className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2 hover:shadow-md transition-all duration-200"
-                >
-                  <Headphones className="h-3 w-3" />
-                  <span className="max-w-[120px] truncate">{audio.name}</span>
-                  <Badge variant="secondary" className="text-xs">
-                    {audio.duration}
-                  </Badge>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onViewAudio(audio.id)}
-                  className="p-2 hover:bg-audio-primary/10"
-                  title="View individual analysis"
-                >
-                  <Eye className="h-3 w-3" />
-                </Button>
-                {index < audioEvidence.length - 1 && (
-                  <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                )}
-              </div>
-            ))}
-          </div>
+        {/* Audio Files */}
+        <div className="flex gap-2 flex-wrap">
+          {audioEvidence.map((audio, index) => (
+            <div key={audio.id} className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onViewAudio(audio.id)}
+                className="flex items-center gap-2 transition-all duration-200 !bg-blue-100 text-primary !hover:bg-blue-100"
+              >
+                <div className="text-xs flex items-center gap-1 border-r border-primary px-2 ">
+                  <Clock className="h-3 w-3" />
+                  {audio.duration}
+                </div>
+                <Headphones className="h-3 w-3" />
+                <span className="max-w-[180px] truncate">{audio.name}</span>
+              </Button>
+
+              {index < audioEvidence.length - 1 && (
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto min-h-0">
-        <div className="container mx-auto px-6 py-8">
+        <div className="p-6 pt-8">
           {/* Summary Statistics */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {summaryCards.map((card) => (
@@ -421,7 +410,7 @@ export function AudioComparison({
                 {allWitnesses.map((witness) => (
                   <Card
                     key={witness.id}
-                    className="border-l-4 border-l-audio-primary"
+                    className="border-l-4 border-l-blue-200 bg-blue-50/30"
                   >
                     <CardHeader className="pb-4">
                       <div className="flex items-center gap-4">

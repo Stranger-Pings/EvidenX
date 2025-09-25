@@ -84,7 +84,7 @@ export default function ChatPanel({
             value={chatQuery}
             onChange={(e) => onChatQueryChange(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && onSubmit()}
-            className="flex-1 h-9 rounded-full bg-white"
+            className="flex-1 h-9 rounded-md bg-white"
           />
           <Button
             size="sm"

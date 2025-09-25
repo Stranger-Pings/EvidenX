@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import { ScrollArea } from "./ui/scroll-area";
 import { Badge } from "./ui/badge";
 import { Slider } from "./ui/slider";
 import {
@@ -15,10 +16,11 @@ import {
   MessageSquare,
   Search,
   Image as ImageIcon,
-  
 } from "lucide-react";
 import { dataValuesEvidence } from "../data/dataValues";
 import { Evidence } from "../types/case";
+import GradientHeader from "./common/GradientHeader";
+import BackButton from "./common/BackButton";
 
 interface VideoEvidenceProcessingProps {
   evidenceId: string;
@@ -36,6 +38,22 @@ type BoundingBox = {
   coords: [number, number, number, number];
   showForSeconds?: number;
 };
+
+function Bubble({
+  children,
+  variant,
+}: {
+  children: React.ReactNode;
+  variant: "query" | "response";
+}) {
+  const base =
+    "relative w-fit max-w-[220px] px-3 py-2 text-sm leading-5 rounded-2xl shadow-sm";
+  const styles =
+    variant === "query"
+      ? "bg-blue-600 text-white shadow-md after:content-[''] after:absolute after:-right-2 after:top-3 after:border-y-8 after:border-y-transparent after:border-l-8 after:border-l-blue-600"
+      : "bg-white text-foreground border border-blue-100 after:content-[''] after:absolute after:-left-2 after:top-3 after:border-y-8 after:border-y-transparent after:border-r-8 after:border-r-white";
+  return <div className={`${base} ${styles}`}>{children}</div>;
+}
 
 export function VideoEvidenceProcessing({
   evidenceId,
@@ -307,49 +325,44 @@ export function VideoEvidenceProcessing({
   return (
     <div className="flex h-full bg-background space-x-3 p-3">
       {/* Chat Panel */}
-      <div className="w-80 border-r bg-card flex flex-col rounded-lg">
-        <div className="p-4 border-b">
+      <div className="w-80 bg-gradient-to-b from-blue-50 to-blue-100/40 border-r flex flex-col h-full">
+        <div className="p-4 flex-shrink-0">
           <h3 className="font-medium flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" />
+            <MessageSquare className="h-4 w-4 text-blue-600" />
             Video Analysis
           </h3>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-[11px] text-muted-foreground mt-1">
             Search for people, objects, or activities
           </p>
         </div>
 
-        <div className="flex-1 p-4 overflow-y-auto">
+        <ScrollArea className="flex-1 px-3 pb-3 min-h-0">
           <div className="space-y-4">
             {chatHistory.map((chat, index) => (
               <div key={index} className="space-y-2">
-                <div className="bg-primary text-primary-foreground p-3 rounded-lg text-sm">
-                  {chat.query}
+                <div className="flex justify-end">
+                  <Bubble variant="query">{chat.query}</Bubble>
                 </div>
-                <div className="bg-muted p-3 rounded-lg text-sm space-y-2">
-                  <p>
-                    {chat.response === "Thinking..." ? (
-                      <span className="animate-pulse text-gray-400">
-                        Thinking...
-                      </span>
-                    ) : (
-                      chat.response
+
+                <div className="flex justify-start">
+                  <Bubble variant="response">
+                    <div>{chat.response}</div>
+                    {chat.timestamps.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {chat.timestamps.map((timestamp, idx) => (
+                          <Button
+                            key={idx}
+                            variant="link"
+                            size="sm"
+                            className="p-0 h-auto text-blue-200 underline"
+                            onClick={() => handleSeekToTime(timestamp)}
+                          >
+                            {formatTime(timestamp)}
+                          </Button>
+                        ))}
+                      </div>
                     )}
-                  </p>
-                  {chat.timestamps.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {chat.timestamps.map((timestamp, idx) => (
-                        <Button
-                          key={idx}
-                          variant="link"
-                          size="sm"
-                          className="p-0 h-auto text-blue-400 underline"
-                          onClick={() => handleSeekToTime(timestamp)}
-                        >
-                          {formatTime(timestamp)}
-                        </Button>
-                      ))}
-                    </div>
-                  )}
+                  </Bubble>
                 </div>
               </div>
             ))}
@@ -357,23 +370,25 @@ export function VideoEvidenceProcessing({
             {/* Loading state */}
             {isLoading && (
               <div className="space-y-2">
-                <div className="bg-primary text-primary-foreground p-3 rounded-lg text-sm">
-                  {chatQuery}
+                <div className="flex justify-end">
+                  <Bubble variant="query">{chatQuery}</Bubble>
                 </div>
-                <div className="bg-muted p-3 rounded-lg text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-blue-600"></div>
-                    <span className="text-muted-foreground">
-                      Intelligence analysis...
-                    </span>
-                  </div>
+                <div className="flex justify-start">
+                  <Bubble variant="response">
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-blue-600"></div>
+                      <span className="text-muted-foreground">
+                        Intelligence analysis...
+                      </span>
+                    </div>
+                  </Bubble>
                 </div>
               </div>
             )}
           </div>
-        </div>
+        </ScrollArea>
 
-        <div className="p-4 border-t space-y-3 flex-shrink-0">
+        <div className="p-3 border-t flex-shrink-0 bg-gradient-to-t from-blue-50/60 to-transparent space-y-3">
           {/* Image Upload */}
           <div>
             <label className="text-sm font-medium mb-2 block">
@@ -394,30 +409,27 @@ export function VideoEvidenceProcessing({
 
           {/* Text Query */}
           <div>
-            <label className="text-sm font-medium mb-2 block">
-              Or describe what to find:
-            </label>
             <div className="flex gap-2">
               <Input
-                placeholder="e.g., person in blue shirt..."
+                placeholder="Ask about evidence..."
                 value={chatQuery}
                 onChange={(e) => setChatQuery(e.target.value)}
                 onKeyPress={(e) =>
                   e.key === "Enter" && !isLoading && handleChatSubmit()
                 }
-                className="flex-1"
-                size={undefined}
+                className="flex-1 h-9 rounded-md bg-white"
                 disabled={isLoading}
               />
               <Button
                 size="sm"
                 onClick={handleChatSubmit}
                 disabled={isLoading || !chatQuery.trim()}
+                className="h-9 px-3 rounded-md bg-blue-600 hover:bg-blue-700 text-white"
               >
                 {isLoading ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
                 ) : (
-                  <Search className="h-4 w-4" />
+                  "Send"
                 )}
               </Button>
             </div>
@@ -428,20 +440,15 @@ export function VideoEvidenceProcessing({
       {/* Video Player Area */}
       <div className="flex-1 flex flex-col bg-card rounded-lg">
         {/* Header */}
-        <div className="border-b p-4">
+        <div className="border-b p-6 pt-8 flex flex-col">
+          <BackButton onBack={onBack} location="Case" />
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={onBack}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-audio-primary to-audio-secondary bg-clip-text text-transparent">
-                {evidence.name}
-              </h1>
-              <p className="text-sm text-muted-foreground">
+              <GradientHeader title={evidence.name} />
+              <p className="text-base text-muted-foreground">
                 {evidence.description} • {evidence.fileSize}
               </p>
             </div>
-            <Badge variant="secondary">{evidence.type}</Badge>
           </div>
         </div>
 

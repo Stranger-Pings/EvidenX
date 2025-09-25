@@ -18,8 +18,8 @@ interface CaseCardProps {
 
 export function CaseCard({ case_, onCaseSelect }: CaseCardProps) {
   return (
-    <Card className="hover-lift transition-shadow flex flex-col h-full">
-      <CardHeader className="pb-3 flex-shrink-0">
+    <Card className="hover-lift border-primary/40 transition-shadow flex flex-col h-full">
+      <CardHeader className="pb-3 flex-shrink-0 bg-gradient-to-b from-blue-100/70 to-blue-100/20 rounded-t-xl">
         <div className="flex items-start justify-between mb-3">
           <div className="flex gap-2">
             <CaseProgressBadge progress={case_.status} />
@@ -72,10 +72,10 @@ export function CaseCard({ case_, onCaseSelect }: CaseCardProps) {
         </div>
       </CardContent>
 
-      <CardFooter className="border-t bg-accent/20 py-4">
+      <CardFooter className="border-t border-dashed bg-accent/20 py-4">
         <Button
           variant="secondary"
-          className="w-full bg-blue-100 text-blue-700 hover:bg-blue-200"
+          className="w-full bg-secondary text-card text-base"
           onClick={() => onCaseSelect(case_.id)}
         >
           View Details
