@@ -43,6 +43,7 @@ export function CaseDetailsPage({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEvidence, setSelectedEvidence] = useState<string[]>([]);
   const [chatQuery, setChatQuery] = useState("");
+  const [isChatPanelOpen, setIsChatPanelOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState([
     {
       query: "What time did the suspects enter the building?",
@@ -152,59 +153,63 @@ export function CaseDetailsPage({
   };
 
   return (
-    <div className="flex h-full bg-background">
+    <>
+    <div className="relative flex h-full bg-background">
       {/* Chat Panel */}
-      <div className="w-80 border-r bg-card flex flex-col h-full">
-        <div className="p-4 border-b flex-shrink-0">
-          <h3 className="font-medium flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" />
-            AI Assistant
-          </h3>
-          <p className="text-xs text-muted-foreground mt-1">
-            Query across all case evidence
-          </p>
-        </div>
-
-        <ScrollArea className="flex-1 p-4 min-h-0">
-          <div className="space-y-4">
-            {chatHistory.map((chat, index) => (
-              <div key={index} className="space-y-2">
-                <div className="bg-primary text-primary-foreground p-3 rounded-lg text-sm">
-                  {chat.query}
-                </div>
-                <div className="bg-muted p-3 rounded-lg text-sm">
-                  {chat.response}
-                  {chat.videoTimestamp && (
-                    <Button
-                      variant="link"
-                      size="sm"
-                      className="p-0 h-auto text-blue-400 underline mt-2"
-                    >
-                      Jump to video ({Math.floor(chat.videoTimestamp / 60)}:
-                      {(chat.videoTimestamp % 60).toString().padStart(2, "0")})
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ))}
+      {isChatPanelOpen && (
+        <div className="w-80 border-r bg-card flex flex-col h-full">
+          <div className="p-4 border-b flex-shrink-0">
+            <h3 className="font-medium flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              AI Assistant
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              Query across all case evidence
+            </p>
           </div>
-        </ScrollArea>
 
-        <div className="p-4 border-t flex-shrink-0">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Ask about evidence..."
-              value={chatQuery}
-              onChange={(e) => setChatQuery(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleChatSubmit()}
-              className="flex-1"
-            />
-            <Button size="sm" onClick={handleChatSubmit}>
-              Send
-            </Button>
+          <ScrollArea className="flex-1 p-4 min-h-0">
+            <div className="space-y-4">
+              {chatHistory.map((chat, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="bg-primary text-primary-foreground p-3 rounded-lg text-sm">
+                    {chat.query}
+                  </div>
+                  <div className="bg-muted p-3 rounded-lg text-sm">
+                    {chat.response}
+                    {chat.videoTimestamp && (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="p-0 h-auto text-blue-400 underline mt-2"
+                      >
+                        Jump to video ({Math.floor(chat.videoTimestamp / 60)}:
+                        {(chat.videoTimestamp % 60).toString().padStart(2, "0")}
+                        )
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+
+          <div className="p-4 border-t flex-shrink-0">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Ask about evidence..."
+                value={chatQuery}
+                onChange={(e) => setChatQuery(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleChatSubmit()}
+                className="flex-1"
+              />
+              <Button size="sm" onClick={handleChatSubmit}>
+                Send
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
@@ -659,6 +664,28 @@ export function CaseDetailsPage({
           </Tabs>
         </div>
       </div>
+
     </div>
+
+    {/* Floating Chat Button */}
+    <div 
+      className="fixed bottom-6 right-6 z-[9999]"
+      style={{ 
+        position: 'fixed', 
+        bottom: '24px', 
+        right: '24px',
+        zIndex: 9999
+      }}
+    >
+      <Button
+        onClick={() => setIsChatPanelOpen(!isChatPanelOpen)}
+        className="h-14 w-20 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+        size="default"
+      >
+        <MessageSquare className="h-6 w-6" />
+        AI Assistant
+      </Button>
+    </div>
+    </>
   );
 }
