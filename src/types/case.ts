@@ -13,7 +13,7 @@ export interface Case {
   description?: string;
   created_at: string;
   updated_at: string;
-  evidence: Evidence[];
+  evidence?: Evidence[];
 }
 
 export interface Evidence {

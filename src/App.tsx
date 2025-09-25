@@ -52,8 +52,8 @@ export default function App() {
     navigateTo("case-details", { selectedCaseId: caseId, selectedCase: case_ });
   };
 
-  const handleViewTimeline = () => {
-    navigateTo("timeline");
+  const handleViewTimeline = (caseId: string) => {
+    navigateTo("timeline", { selectedCaseId: caseId });
   };
 
   const handleViewVideo = (evidenceId: string) => {
@@ -193,12 +193,12 @@ export default function App() {
               );
 
             case "timeline":
-              if (!appState.selectedCaseId) {
+              if (!appState.selectedCase) {
                 return <div>No case selected</div>;
               }
               return (
                 <IncidentTimeline
-                  caseId={appState.selectedCaseId}
+                  caseId={appState.selectedCase.id}
                   onBack={handleBack}
                   onViewEvidence={handleViewEvidence}
                 />

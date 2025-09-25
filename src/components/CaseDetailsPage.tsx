@@ -29,7 +29,7 @@ import ChatPanel from "./chat/ChatPanel";
 interface CaseDetailsPageProps {
   caseId?: string;
   onBack: () => void;
-  onViewTimeline: () => void;
+  onViewTimeline: (caseId: string) => void;
   onViewVideo: (evidenceId: string) => void;
   onViewAudio: (evidenceId: string) => void;
   onCompareAudios: (evidenceIds: string[]) => void;
@@ -180,7 +180,7 @@ export function CaseDetailsPage({
                     </Badge>
                   )}
                   <Button
-                    onClick={onViewTimeline}
+                    onClick={() => onViewTimeline(case_.id)}
                     className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     <TrendingUp className="h-4 w-4 mr-2" />
