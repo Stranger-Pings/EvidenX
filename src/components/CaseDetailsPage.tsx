@@ -19,6 +19,7 @@ import {
   Download,
   Eye,
   TrendingUp,
+  MessageCircleMore,
 } from "lucide-react";
 import { mockCases, mockEvidence } from "../data/mockData";
 import { Case, Evidence } from "../types/case";
@@ -634,11 +635,10 @@ export function CaseDetailsPage({
       >
         <Button
           onClick={() => setIsChatPanelOpen(!isChatPanelOpen)}
-          className="h-14 w-20 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+          className="h-16 w-16 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer !p-0"
           size="default"
         >
-          <MessageSquare className="h-6 w-6" />
-          AI Assistant
+          <MessageCircleMore className="!h-8 !w-8" />
         </Button>
       </div>
     </>
