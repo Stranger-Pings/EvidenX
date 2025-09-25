@@ -15,11 +15,9 @@ import {
   MessageSquare,
   Search,
   Image as ImageIcon,
-  Flag,
-  User,
-  Zap,
+  
 } from "lucide-react";
-import { mockEvidence } from "../data/mockData";
+import { dataValuesEvidence } from "../data/dataValues";
 import { Evidence } from "../types/case";
 
 interface VideoEvidenceProcessingProps {
@@ -67,7 +65,7 @@ export function VideoEvidenceProcessing({
   const HARDCODED_CHATS: ChatEntry[] = [
     {
       query: "Identify girl in pink top, wide leg blue jeans, white sneakers",
-      response: "Found person in ping top at following timestamps:",
+      response: "Found person in pink top at following timestamps:",
       timestamps: [398, 613],
     },
     {
@@ -114,7 +112,7 @@ export function VideoEvidenceProcessing({
     { time: number; type: string; label: string; color: string }[]
   >([]);
 
-  const evidence: Evidence | undefined = mockEvidence.find(
+  const evidence: Evidence | undefined = dataValuesEvidence.find(
     (e) => e.id === evidenceId
   );
 

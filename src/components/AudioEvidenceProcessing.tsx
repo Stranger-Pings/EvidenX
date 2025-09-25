@@ -10,12 +10,12 @@ import {
   Pause,
   SkipBack,
   SkipForward,
-  Volume2,
+  // Volume2,
   Download,
   FileText,
   AudioLines,
 } from "lucide-react";
-import { mockEvidence } from "../data/mockData";
+import { dataValuesEvidence } from "../data/dataValues";
 import { Evidence } from "../types/case";
 import { motion } from "framer-motion";
 
@@ -31,7 +31,7 @@ export function AudioEvidenceProcessing({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0); // Mock current time in seconds
   const [duration, setDuration] = useState(0);
-  const [transcript, setTranscript] = useState(
+  const [transcript] = useState(
     `speaker_0: "good evening i need to ask you about the missing person sarah green when did you last see her"
 speaker_1: "i saw her yesterday i found six in the evening near the old life"
 speaker_0: "interesting did she mention where she was going"
@@ -50,7 +50,7 @@ speaker_0: "thank you your information will help us investigating further"`
   const [newQuestion, setNewQuestion] = useState("");
   const [showQuestions, setShowQuestions] = useState(false);
 
-  const evidence: Evidence | undefined = mockEvidence.find(
+  const evidence: Evidence | undefined = dataValuesEvidence.find(
     (e) => e.id === evidenceId
   );
 

@@ -19,7 +19,7 @@ import {
   TrendingUp,
   MessageCircleMore,
 } from "lucide-react";
-import { mockCases, mockEvidence } from "../data/mockData";
+import { dataValuesCases, dataValuesEvidence } from "../data/dataValues";
 import { Case, Evidence } from "../types/case";
 import EvidenceSummary from "./EvidenceSummary";
 import CaseProgressBadge from "./common/CaseProgressBadge";
@@ -69,8 +69,8 @@ export function CaseDetailsPage({
     },
   ]);
 
-  const case_: Case | undefined = mockCases.find((c) => c.id === caseId);
-  const caseEvidence = mockEvidence.filter((e) => e.caseId === caseId);
+  const case_: Case | undefined = dataValuesCases.find((c) => c.id === caseId);
+  const caseEvidence = dataValuesEvidence.filter((e) => e.caseId === caseId);
 
   if (!case_) {
     return <div>Case not found</div>;
@@ -324,7 +324,7 @@ export function CaseDetailsPage({
                             variant="default"
                           >
                             <Headphones className="h-4 w-4 mr-2" />
-                            Compare Audio ({getSelectedAudioCount()})
+                            Analyse Audio ({getSelectedAudioCount()})
                           </Button>
                         )}
                         {selectedEvidence.length > 0 &&

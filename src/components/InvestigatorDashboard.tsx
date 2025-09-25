@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Search, Plus } from "lucide-react";
-import { mockCases } from "../data/mockData";
+import { dataValuesCases } from "../data/dataValues";
 import { Case } from "../types/case";
 import { CaseCard } from "./CaseCard";
 
@@ -27,7 +27,7 @@ export function InvestigatorDashboard({
   const [visibilityFilter, setVisibilityFilter] = useState<string>("all");
 
   const filteredCases = useMemo(() => {
-    return mockCases.filter((case_) => {
+    return dataValuesCases.filter((case_) => {
       const matchesSearch =
         case_.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         case_.firNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -105,7 +105,7 @@ export function InvestigatorDashboard({
       {/* Results Summary */}
       <div className="flex items-center justify-between py-4 ">
         <p className="text-muted-foreground">
-          Showing {filteredCases.length} of {mockCases.length} cases
+          Showing {filteredCases.length} of {dataValuesCases.length} cases
         </p>
       </div>
 

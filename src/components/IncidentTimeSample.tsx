@@ -13,7 +13,7 @@ import {
   Search,
   AlertCircle,
 } from "lucide-react";
-import { mockTimelineEvents, mockCases } from "../data/mockData";
+import { dataValuesTimelineEvents, dataValuesCases } from "../data/dataValues";
 import { TimelineEvent, Case } from "../types/case";
 
 interface IncidentTimelineProps {
@@ -30,8 +30,8 @@ export function IncidentTimeline({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSource, setSelectedSource] = useState<string>("all");
 
-  const case_: Case | undefined = mockCases.find((c) => c.id === caseId);
-  const timelineEvents = mockTimelineEvents.filter((e) => e.caseId === caseId);
+  const case_: Case | undefined = dataValuesCases.find((c) => c.id === caseId);
+  const timelineEvents = dataValuesTimelineEvents.filter((e) => e.caseId === caseId);
   // Extended mock timeline data
   const extendedEvents = [
     ...timelineEvents,

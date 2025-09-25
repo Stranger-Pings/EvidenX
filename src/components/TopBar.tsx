@@ -40,7 +40,7 @@ interface TopBarProps {
 }
 
 export function TopBar({
-  investigatorName = "Inspector Sarah Williams",
+  investigatorName = "Inspector Malhotra",
   investigatorRole = "Senior Investigating Officer",
   investigatorImage,
 }: TopBarProps) {

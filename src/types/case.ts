@@ -62,11 +62,12 @@ export interface Witness {
 export interface DetailedAnalysisItem {
   topic: string;
   witness1: string;
-  witness2: string;
-  status: "similarity" | "contradiction" | "gray_area";
+  witness2?: string;
+  witness3?: string;
+  status: "similarity" | "contradiction" | "gray_area" | "grey area";
   details: string;
   confidence?: number;
-  importance?: "high" | "medium" | "low";
+  importance?: "high" | "medium" | "low" | "critical";
 }
 
 export interface AudioComparison {

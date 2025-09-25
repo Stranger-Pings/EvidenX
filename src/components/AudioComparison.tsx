@@ -24,12 +24,12 @@ import {
   ChevronRight,
   Headphones,
   Eye,
-  Clock,
+  
   Users,
   TrendingUp,
-  X,
+  
 } from "lucide-react";
-import { mockEvidence, mockAudioComparisons } from "../data/mockData";
+import { dataValuesEvidence, dataValuesAudioComparisons } from "../data/dataValues";
 import { Evidence, type AudioComparison } from "../types/case";
 
 interface AudioComparisonProps {
@@ -43,7 +43,7 @@ export function AudioComparison({
   evidenceIds,
   onBack,
   onViewAudio,
-  audioComparisons = mockAudioComparisons,
+  audioComparisons = dataValuesAudioComparisons,
 }: AudioComparisonProps) {
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [selectedAnalysisType, setSelectedAnalysisType] = useState<
@@ -52,7 +52,7 @@ export function AudioComparison({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const audioEvidence = evidenceIds
-    .map((id) => mockEvidence.find((e) => e.id === id))
+    .map((id) => dataValuesEvidence.find((e) => e.id === id))
     .filter((e): e is Evidence => e !== undefined && e.type === "audio");
 
   const comparisonData = audioComparisons.filter(
@@ -345,7 +345,7 @@ export function AudioComparison({
                             </CardTitle>
                           </div>
                           <div className="flex items-center gap-2">
-                            {getImportanceIcon(analysis?.importance)}
+                            {getImportanceIcon(analysis?.importance ?? "low")}
                             <Badge variant="outline" className="text-xs">
                               {analysis.confidence}% confidence
                             </Badge>
@@ -373,7 +373,7 @@ export function AudioComparison({
                               Witness 2
                             </h4>
                             <p className="text-sm italic">
-                              "{analysis.witness2}"
+                              "{analysis.witness2 ?? ""}"
                             </p>
                           </div>
                         </div>
