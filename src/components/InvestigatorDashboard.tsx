@@ -1,6 +1,4 @@
 import { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import {
@@ -10,9 +8,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Search, Calendar, User, FileText, Plus } from "lucide-react";
+import { Search, Plus } from "lucide-react";
 import { mockCases } from "../data/mockData";
 import { Case } from "../types/case";
+import { CaseCard } from "./CaseCard";
 
 interface InvestigatorDashboardProps {
   onCaseSelect: (caseId: string) => void;
@@ -131,78 +130,7 @@ export function InvestigatorDashboard({
         {/* Case Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCases.map((case_) => (
-            <Card
-              key={case_.id}
-              className="hover:shadow-md transition-shadow flex flex-col h-full"
-            >
-              <CardHeader className="pb-3 flex-shrink-0">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex gap-2">
-                    <Badge className={getStatusColor(case_.status)}>
-                      {case_.status}
-                    </Badge>
-                    <Badge className={getVisibilityColor(case_.visibility)}>
-                      {case_.visibility}
-                    </Badge>
-                  </div>
-                </div>
-                <CardTitle className="line-clamp-2">{case_.title}</CardTitle>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <FileText className="h-3 w-3" />
-                  <span>{case_.firNumber}</span>
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-4 flex-1 flex flex-col">
-                <div className="flex-1 space-y-4">
-                  {/* Summary */}
-                  <p className="text-sm text-muted-foreground line-clamp-3">
-                    {case_.summary}
-                  </p>
-
-                  {/* Key Details */}
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <User className="h-3 w-3 text-muted-foreground" />
-                      <span className="font-medium">Petitioner:</span>
-                      <span className="text-muted-foreground truncate">
-                        {case_.petitioner}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <User className="h-3 w-3 text-muted-foreground" />
-                      <span className="font-medium">Accused:</span>
-                      <span className="text-muted-foreground truncate">
-                        {case_.accused}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <User className="h-3 w-3 text-muted-foreground" />
-                      <span className="font-medium">IO:</span>
-                      <span className="text-muted-foreground truncate">
-                        {case_.investigatingOfficer}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-3 w-3 text-muted-foreground" />
-                      <span className="font-medium">Registered:</span>
-                      <span className="text-muted-foreground">
-                        {new Date(case_.registeredDate).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Action Button */}
-                <Button
-                  onClick={() => onCaseSelect(case_.id)}
-                  className="w-full mt-auto"
-                  variant="outline"
-                >
-                  View Details
-                </Button>
-              </CardContent>
-            </Card>
+            <CaseCard key={case_.id} case_={case_} onCaseSelect={onCaseSelect} />
           ))}
         </div>
 

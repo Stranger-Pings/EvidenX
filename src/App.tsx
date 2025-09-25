@@ -25,7 +25,7 @@ interface AppState {
 }
 export default function App() {
   const [appState, setAppState] = useState({
-    currentView: "registration",
+    currentView: "dashboard",
   } as AppState);
 
   const navigateTo = (view: ViewType, params?: Partial<AppState>) => {
