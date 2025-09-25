@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MessageSquare } from "lucide-react";
+import { Loader2, MessageSquare } from "lucide-react";
+import { useSendQueryMutation } from "@/store/globalChat.api";
 
 type ChatItem = {
   query: string;
@@ -26,17 +28,56 @@ function Bubble({
   return <div className={`${base} ${styles}`}>{children}</div>;
 }
 
-export default function ChatPanel({
-  chatHistory,
-  chatQuery,
-  onChatQueryChange,
-  onSubmit,
-}: {
-  chatHistory: ChatItem[];
-  chatQuery: string;
-  onChatQueryChange: (v: string) => void;
-  onSubmit: () => void;
-}) {
+export default function ChatPanel({ caseId }: { caseId: string }) {
+  const [chatHistory, setChatHistory] = useState<ChatItem[]>([
+    {
+      query: "What time did the suspects enter the building?",
+      response:
+        "Based on CCTV analysis, two suspects entered at 02:32 AM through the main entrance. Video timestamp: 02:32:15",
+      videoTimestamp: 9135,
+    },
+    {
+      query: "Are there any contradictions in witness statements?",
+      response:
+        "Security guard mentions 2:30 AM while store owner suggests earlier timing. Audio evidence shows discrepancy in timeline accounts.",
+      audioTimestamps: [145, 670],
+    },
+  ]);
+  const [chatQuery, setChatQuery] = useState("");
+  const [sendQuery, { isLoading: isSending }] = useSendQueryMutation();
+
+  const handleSubmit = async () => {
+    if (!chatQuery.trim()) return;
+    try {
+      const res = await sendQuery({ caseId, query: chatQuery }).unwrap();
+      const botText = res?.message;
+
+      const ts = Array.isArray((res as any)?.videoTimestamps)
+        ? (res as any).videoTimestamps[0]
+        : (res as any)?.videoTimestamp;
+      const audioTs = Array.isArray((res as any)?.audioTimestamps)
+        ? (res as any).audioTimestamps
+        : [];
+
+      setChatHistory((prev) => [
+        ...prev,
+        typeof ts === "number"
+          ? { query: chatQuery, response: botText, videoTimestamp: ts }
+          : { query: chatQuery, response: botText, audioTimestamps: audioTs },
+      ]);
+    } catch (e) {
+      setChatHistory((prev) => [
+        ...prev,
+        {
+          query: chatQuery,
+          response: "Sorry, I couldn't fetch an answer right now.",
+          audioTimestamps: [],
+        },
+      ]);
+    }
+    setChatQuery("");
+  };
+
   return (
     <div className="w-80 bg-gradient-to-b from-blue-50 to-blue-100/40 border-r flex flex-col h-full">
       <div className="p-4 flex-shrink-0">
@@ -82,16 +123,17 @@ export default function ChatPanel({
           <Input
             placeholder="Ask about evidence..."
             value={chatQuery}
-            onChange={(e) => onChatQueryChange(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && onSubmit()}
+            onChange={(e) => setChatQuery(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && handleSubmit()}
             className="flex-1 h-9 rounded-full bg-white"
           />
           <Button
             size="sm"
-            onClick={onSubmit}
+            onClick={handleSubmit}
+            disabled={isSending}
             className="h-9 px-3 rounded-md bg-blue-600 hover:bg-blue-700 text-white"
           >
-            Send
+            {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send"}
           </Button>
         </div>
       </div>
