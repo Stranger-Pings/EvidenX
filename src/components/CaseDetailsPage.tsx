@@ -26,7 +26,6 @@ import CaseProgressBadge from "./common/CaseProgressBadge";
 import CaseAccessBadge from "./common/CaseAccessBadge";
 import { VideoPlayerPopup } from "./VideoPlayerPopup";
 import ChatPanel from "./chat/ChatPanel";
-import { useSendQueryMutation } from "@/store/globalChat.api";
 
 interface CaseDetailsPageProps {
   caseId?: string;
@@ -49,7 +48,6 @@ export function CaseDetailsPage({
 }: CaseDetailsPageProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEvidence, setSelectedEvidence] = useState<string[]>([]);
-  const [chatQuery, setChatQuery] = useState("");
   const [isChatPanelOpen, setIsChatPanelOpen] = useState(false);
   const [videoPlayerOpen, setVideoPlayerOpen] = useState(false);
   const [videoTimestamp, setVideoTimestamp] = useState<number | undefined>(
@@ -72,17 +70,12 @@ export function CaseDetailsPage({
     },
   ]);
 
-  const [sendQuery] = useSendQueryMutation();
-  if (!caseId) {
-    return <div>Case not found</div>;
-  }
-
   const case_: Case | undefined = cases.find((c) => c.id === caseId);
   const caseEvidence = mockEvidence.filter((e) => e.caseId === caseId);
 
-  // if (!case_) {
-  //   return <div>Case not found</div>;
-  // }
+  if (!case_) {
+    return <div>Case not found</div>;
+  }
 
   console.log(case_);
   const filteredEvidence = caseEvidence.filter(
@@ -167,42 +160,11 @@ export function CaseDetailsPage({
       });
   };
 
-  const handleChatSubmit = async () => {
-    if (!chatQuery.trim()) return;
-
-    try {
-      const response = await sendQuery({ caseId, query: chatQuery }).unwrap();
-      console.log(response);
-    } catch (e) {
-      console.error(e);
-    }
-
-    // Mock response
-    const mockResponse =
-      "I found 3 relevant pieces of evidence related to your query. Video evidence shows movement at 02:45 AM (timestamp: 02:45:30).";
-    setChatHistory((prev) => [
-      ...prev,
-      {
-        query: chatQuery,
-        response: mockResponse,
-        videoTimestamp: 9930,
-      },
-    ]);
-    setChatQuery("");
-  };
-
   return (
     <>
       <div className="relative flex h-full bg-background">
         {/* Chat Panel */}
-        {isChatPanelOpen && (
-          <ChatPanel
-            chatHistory={chatHistory}
-            chatQuery={chatQuery}
-            onChatQueryChange={setChatQuery}
-            onSubmit={handleChatSubmit}
-          />
-        )}
+        {isChatPanelOpen && <ChatPanel caseId={caseId || ""} />}
 
         {/* Main Content */}
         <div className="flex-1 flex px-6 flex-col h-full overflow-y-auto">
