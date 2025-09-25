@@ -307,7 +307,7 @@ export function AudioComparison({
 
           {/* Analysis Details Dialog */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto px-6 pt-6">
               <DialogHeader>
                 <DialogTitle className="text-2xl flex items-center gap-2">
                   {getStatusIcon(selectedAnalysisType)}
@@ -318,7 +318,7 @@ export function AudioComparison({
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="mt-6">
+              <div className="m-6">
                 <div className="mb-4 flex items-center gap-2">
                   <Badge variant="outline" className="flex items-center gap-1">
                     <FileText className="h-3 w-3" />
