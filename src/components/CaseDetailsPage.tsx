@@ -19,6 +19,7 @@ import {
   Download,
   Eye,
   TrendingUp,
+  MessageCircleMore,
 } from "lucide-react";
 import { mockCases, mockEvidence } from "../data/mockData";
 import { Case, Evidence } from "../types/case";
@@ -290,9 +291,9 @@ export function CaseDetailsPage({
               </div>
 
               <TabsContent value="overview" className="mt-4 flex-1">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="flex gap-6 w-full">
                   {/* Case Information */}
-                  <Card className="rounded-2xl shadow-sm bg-card">
+                  <Card className="rounded-2xl shadow-sm bg-card w-4/5">
                     <CardHeader>
                       <CardTitle className="text-xl font-semibold">
                         Case Overview
@@ -316,17 +317,19 @@ export function CaseDetailsPage({
                       </div>
                       <div>
                         <div className="text-sm text-muted-foreground mb-1">
-                          Summary:
+                          Description:
                         </div>
                         <p className="text-base leading-7 text-foreground">
-                          {case_.summary}
+                          {case_.description}
                         </p>
                       </div>
                     </CardContent>
                   </Card>
 
                   {/* Quick Stats */}
-                  <EvidenceSummary evidence={caseEvidence} />
+                  <div className="w-1/5">
+                    <EvidenceSummary evidence={caseEvidence} />
+                  </div>
                 </div>
               </TabsContent>
 
@@ -383,9 +386,9 @@ export function CaseDetailsPage({
 
                 {/* Sticky Selection Summary */}
                 {selectedEvidence.length > 0 && (
-                  <div className="sticky top-[73px] z-10 bg-background pb-4 mb-4">
-                    <Card className="hover-lift">
-                      <CardContent className="p-4">
+                  <div className="bg-background pt-4">
+                    <Card className="">
+                      <CardContent className="!py-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium">
@@ -422,7 +425,7 @@ export function CaseDetailsPage({
                   <div className="space-y-4">
                     {/* Evidence Grid */}
                     {filteredEvidence.length > 0 && (
-                      <div className="py-3">
+                      <div className="pt-4">
                         <p className="text-sm text-muted-foreground">
                           💡 Click on evidence cards or checkboxes to select
                           multiple items for comparison
@@ -433,11 +436,7 @@ export function CaseDetailsPage({
                       {filteredEvidence.map((evidence) => (
                         <Card
                           key={evidence.id}
-                          className={`hover-lift cursor-pointer transition-all hover:shadow-md hover:bg-accent/50 flex flex-col h-full ${
-                            selectedEvidence.includes(evidence.id)
-                              ? "ring-2 ring-primary bg-primary/5"
-                              : ""
-                          }`}
+                          className={`hover-lift cursor-pointer flex flex-col h-full`}
                         >
                           <CardHeader className="pb-2 flex-shrink-0">
                             <div className="flex items-start justify-between">
@@ -455,15 +454,19 @@ export function CaseDetailsPage({
                                   </Badge>
                                 )}
                               </div>
-                              <input
-                                type="checkbox"
-                                checked={selectedEvidence.includes(evidence.id)}
-                                onChange={(e) => {
-                                  e.stopPropagation();
-                                  handleEvidenceSelect(evidence.id);
-                                }}
-                                className="w-4 h-4 rounded border border-input bg-background text-primary hover:cursor-pointer focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                              />
+                              {evidence.type === "audio" && (
+                                <input
+                                  type="checkbox"
+                                  checked={selectedEvidence.includes(
+                                    evidence.id
+                                  )}
+                                  onChange={(e) => {
+                                    e.stopPropagation();
+                                    handleEvidenceSelect(evidence.id);
+                                  }}
+                                  className="w-4 h-4 focus:ring-0 rounded  hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                                />
+                              )}
                             </div>
                             <CardTitle className="text-base line-clamp-2">
                               {evidence.name}
@@ -632,11 +635,10 @@ export function CaseDetailsPage({
       >
         <Button
           onClick={() => setIsChatPanelOpen(!isChatPanelOpen)}
-          className="h-14 w-20 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+          className="h-16 w-16 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer !p-0"
           size="default"
         >
-          <MessageSquare className="h-6 w-6" />
-          AI Assistant
+          <MessageCircleMore className="!h-8 !w-8" />
         </Button>
       </div>
     </>

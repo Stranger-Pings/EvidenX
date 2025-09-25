@@ -119,7 +119,7 @@ export function CaseRegistrationForm({
             <Button
               variant="outline"
               onClick={onViewExistingCases}
-              className="shrink-0 pb-5"
+              className="border !border-primary !text-primary"
             >
               View Cases
             </Button>
