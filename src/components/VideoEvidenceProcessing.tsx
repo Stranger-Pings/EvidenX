@@ -51,15 +51,18 @@ export function VideoEvidenceProcessing({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [posterUrl, setPosterUrl] = useState<string | undefined>(undefined);
-  const [videoSize, setVideoSize] = useState<{ width: number; height: number }>({
-    width: 0,
-    height: 0,
-  });
+  const [videoSize, setVideoSize] = useState<{ width: number; height: number }>(
+    {
+      width: 0,
+      height: 0,
+    }
+  );
   const [containerSize, setContainerSize] = useState<{
     width: number;
     height: number;
   }>({ width: 0, height: 0 });
   const [chatQuery, setChatQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const HARDCODED_CHATS: ChatEntry[] = [
     {
@@ -74,7 +77,8 @@ export function VideoEvidenceProcessing({
     },
     {
       query: "Show me all people wearing dark clothing",
-      response: "Detected 3 individuals in dark clothing at the following timestamps:",
+      response:
+        "Detected 3 individuals in dark clothing at the following timestamps:",
       timestamps: [120, 245, 380, 520],
     },
     {
@@ -103,9 +107,9 @@ export function VideoEvidenceProcessing({
       timestamps: [220, 380],
     },
   ];
-  
+
   const [chatHistory, setChatHistory] = useState<ChatEntry[]>([]);
-  
+
   const [detectedFlags, setDetectedFlags] = useState<
     { time: number; type: string; label: string; color: string }[]
   >([]);
@@ -167,7 +171,10 @@ export function VideoEvidenceProcessing({
     if (!video) return;
     const onLoaded = () => {
       setDuration(video.duration || 0);
-      setVideoSize({ width: video.videoWidth || 0, height: video.videoHeight || 0 });
+      setVideoSize({
+        width: video.videoWidth || 0,
+        height: video.videoHeight || 0,
+      });
     };
     const onTime = () => setCurrentTime(video.currentTime || 0);
     const onPlay = () => setIsPlaying(true);
@@ -228,49 +235,62 @@ export function VideoEvidenceProcessing({
   };
 
   const handleChatSubmit = () => {
-    if (!chatQuery.trim()) return;
+    if (!chatQuery.trim() || isLoading) return;
+
+    setIsLoading(true);
     const nextIndex = chatHistory.length;
     const predefined = HARDCODED_CHATS[nextIndex];
-    if (predefined) {
-      setChatHistory((prev) => [...prev, predefined]);
-      // When a predefined result is appended, surface its timestamps as flags
-      // Color palette for different messages
-      const colorPalette = [
-        "bg-red-500",      // First message - red
-        "bg-orange-500",    // Second message - orange  
-        "bg-blue-500",      // Third message - blue
-        "bg-green-500",     // Fourth message - green
-        "bg-purple-500",    // Fifth message - purple
-        "bg-pink-500",      // Sixth message - pink
-        "bg-yellow-500",    // Seventh message - yellow
-        "bg-indigo-500",    // Eighth message - indigo
-        "bg-teal-500",      // Ninth message - teal
-        "bg-cyan-500",      // Tenth message - cyan
-      ];
-      const color = colorPalette[nextIndex] || "bg-gray-500";
-      const label = `Result ${nextIndex + 1}`;
-      const newFlags = predefined.timestamps.map((t) => ({
-        time: t,
-        type: "person",
-        label,
-        color,
-      }));
-      setDetectedFlags((prev) =>
-        [...prev, ...newFlags]
-          .sort((a, b) => a.time - b.time)
-          .filter(
-            (flag, idx, arr) =>
-              arr.findIndex((f) => f.time === flag.time && f.color === flag.color) === idx
-          )
-      );
-    } else {
-      // Optional: append a simple echo if more queries are made
-      setChatHistory((prev) => [
-        ...prev,
-        { query: chatQuery, response: "No preset result for this query.", timestamps: [] },
-      ]);
-    }
-    setChatQuery("");
+
+    // Add 3-second delay before showing the response
+    setTimeout(() => {
+      if (predefined) {
+        setChatHistory((prev) => [...prev, predefined]);
+        // When a predefined result is appended, surface its timestamps as flags
+        // Color palette for different messages
+        const colorPalette = [
+          "bg-red-500", // First message - red
+          "bg-orange-500", // Second message - orange
+          "bg-blue-500", // Third message - blue
+          "bg-green-500", // Fourth message - green
+          "bg-purple-500", // Fifth message - purple
+          "bg-pink-500", // Sixth message - pink
+          "bg-yellow-500", // Seventh message - yellow
+          "bg-indigo-500", // Eighth message - indigo
+          "bg-teal-500", // Ninth message - teal
+          "bg-cyan-500", // Tenth message - cyan
+        ];
+        const color = colorPalette[nextIndex] || "bg-gray-500";
+        const label = `Result ${nextIndex + 1}`;
+        const newFlags = predefined.timestamps.map((t) => ({
+          time: t,
+          type: "person",
+          label,
+          color,
+        }));
+        setDetectedFlags((prev) =>
+          [...prev, ...newFlags]
+            .sort((a, b) => a.time - b.time)
+            .filter(
+              (flag, idx, arr) =>
+                arr.findIndex(
+                  (f) => f.time === flag.time && f.color === flag.color
+                ) === idx
+            )
+        );
+      } else {
+        // Optional: append a simple echo if more queries are made
+        setChatHistory((prev) => [
+          ...prev,
+          {
+            query: chatQuery,
+            response: "No preset result for this query.",
+            timestamps: [],
+          },
+        ]);
+      }
+      setChatQuery("");
+      setIsLoading(false);
+    }, 3000);
   };
 
   const handleImageUpload = () => {
@@ -308,23 +328,50 @@ export function VideoEvidenceProcessing({
                   {chat.query}
                 </div>
                 <div className="bg-muted p-3 rounded-lg text-sm space-y-2">
-                  <p>{chat.response}</p>
-                  <div className="flex flex-wrap gap-1">
-                    {chat.timestamps.map((timestamp, idx) => (
-                      <Button
-                        key={idx}
-                        variant="link"
-                        size="sm"
-                        className="p-0 h-auto text-blue-400 underline"
-                        onClick={() => handleSeekToTime(timestamp)}
-                      >
-                        {formatTime(timestamp)}
-                      </Button>
-                    ))}
-                  </div>
+                  <p>
+                    {chat.response === "Thinking..." ? (
+                      <span className="animate-pulse text-gray-400">
+                        Thinking...
+                      </span>
+                    ) : (
+                      chat.response
+                    )}
+                  </p>
+                  {chat.timestamps.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {chat.timestamps.map((timestamp, idx) => (
+                        <Button
+                          key={idx}
+                          variant="link"
+                          size="sm"
+                          className="p-0 h-auto text-blue-400 underline"
+                          onClick={() => handleSeekToTime(timestamp)}
+                        >
+                          {formatTime(timestamp)}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
+
+            {/* Loading state */}
+            {isLoading && (
+              <div className="space-y-2">
+                <div className="bg-primary text-primary-foreground p-3 rounded-lg text-sm">
+                  {chatQuery}
+                </div>
+                <div className="bg-muted p-3 rounded-lg text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-blue-600"></div>
+                    <span className="text-muted-foreground">
+                      Intelligence analysis...
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -357,12 +404,23 @@ export function VideoEvidenceProcessing({
                 placeholder="e.g., person in blue shirt..."
                 value={chatQuery}
                 onChange={(e) => setChatQuery(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleChatSubmit()}
+                onKeyPress={(e) =>
+                  e.key === "Enter" && !isLoading && handleChatSubmit()
+                }
                 className="flex-1"
                 size={undefined}
+                disabled={isLoading}
               />
-              <Button size="sm" onClick={handleChatSubmit}>
-                <Search className="h-4 w-4" />
+              <Button
+                size="sm"
+                onClick={handleChatSubmit}
+                disabled={isLoading || !chatQuery.trim()}
+              >
+                {isLoading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                ) : (
+                  <Search className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </div>
@@ -378,7 +436,9 @@ export function VideoEvidenceProcessing({
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div className="flex-1">
-              <h1>{evidence.name}</h1>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-audio-primary to-audio-secondary bg-clip-text text-transparent">
+                {evidence.name}
+              </h1>
               <p className="text-sm text-muted-foreground">
                 {evidence.description} • {evidence.fileSize}
               </p>
@@ -389,12 +449,14 @@ export function VideoEvidenceProcessing({
 
         {/* Video Content */}
         <div className="flex-1 flex flex-col p-4 pb-0">
-            {/* Video Player */}
-            <div className="bg-black rounded-lg relative overflow-hidden h-[60vh] mb-6" ref={containerRef}>
+          {/* Video Player */}
+          <div
+            className="bg-black rounded-lg relative overflow-hidden h-[60vh] mb-6"
+            ref={containerRef}
+          >
             <video
               ref={videoRef}
-              src={
-                "https://evidenx.s3.us-east-1.amazonaws.com/CCTV_Master.mp4"              }
+              src={"https://evidenx.s3.us-east-1.amazonaws.com/CCTV_Master.mp4"}
               poster={posterUrl || evidence.thumbnail}
               className="absolute inset-0 w-full h-full object-contain bg-black"
               muted={isMuted}
@@ -404,15 +466,39 @@ export function VideoEvidenceProcessing({
             {/* Bounding box overlay near 398s */}
             {(() => {
               const boxes: BoundingBox[] = [
-                { time: 398, coords: [693.59, 36.56, 1002.14, 335.39], showForSeconds: 1 },
-                { time: 613, coords: [1293.59, 136.56, 1602.14, 635.39], showForSeconds: 1 },
-                { time: 812, coords: [693.59, 36.56, 1002.14, 335.39], showForSeconds: 1 },
+                {
+                  time: 398,
+                  coords: [693.59, 36.56, 1002.14, 335.39],
+                  showForSeconds: 1,
+                },
+                {
+                  time: 613,
+                  coords: [1293.59, 136.56, 1602.14, 635.39],
+                  showForSeconds: 1,
+                },
+                {
+                  time: 812,
+                  coords: [693.59, 36.56, 1002.14, 335.39],
+                  showForSeconds: 1,
+                },
               ];
-              const visible = boxes.filter((b) => Math.abs(currentTime - b.time) <= (b.showForSeconds ?? 1) / 2);
-              if (!visible.length || !videoSize.width || !videoSize.height || !containerSize.width || !containerSize.height) {
+              const visible = boxes.filter(
+                (b) =>
+                  Math.abs(currentTime - b.time) <= (b.showForSeconds ?? 1) / 2
+              );
+              if (
+                !visible.length ||
+                !videoSize.width ||
+                !videoSize.height ||
+                !containerSize.width ||
+                !containerSize.height
+              ) {
                 return null;
               }
-              const scale = Math.min(containerSize.width / videoSize.width, containerSize.height / videoSize.height);
+              const scale = Math.min(
+                containerSize.width / videoSize.width,
+                containerSize.height / videoSize.height
+              );
               const displayWidth = videoSize.width * scale;
               const displayHeight = videoSize.height * scale;
               const offsetX = (containerSize.width - displayWidth) / 2;
@@ -421,10 +507,13 @@ export function VideoEvidenceProcessing({
                 <div className="absolute inset-0 pointer-events-none">
                   {visible.map((b, i) => {
                     const [x1, y1, x2, y2] = b.coords;
-                    const left = offsetX + (x1 / videoSize.width) * displayWidth;
-                    const top = offsetY + (y1 / videoSize.height) * displayHeight;
+                    const left =
+                      offsetX + (x1 / videoSize.width) * displayWidth;
+                    const top =
+                      offsetY + (y1 / videoSize.height) * displayHeight;
                     const width = ((x2 - x1) / videoSize.width) * displayWidth;
-                    const height = ((y2 - y1) / videoSize.height) * displayHeight;
+                    const height =
+                      ((y2 - y1) / videoSize.height) * displayHeight;
                     return (
                       <div
                         key={i}
@@ -461,8 +550,8 @@ export function VideoEvidenceProcessing({
             </div>
           </div>
 
-            {/* Video Controls */}
-            <div className="space-y-2 mt-4 mb-0">
+          {/* Video Controls */}
+          <div className="space-y-2 mt-4 mb-0">
             {/* Timeline with slider and flags */}
             <div className="relative ml-4 mt-2">
               <Slider
@@ -479,7 +568,7 @@ export function VideoEvidenceProcessing({
               />
               {/* Detection flags overlay */}
               {duration > 0 && (
-                <div className="pointer-events-none absolute inset-0">
+                <div className="pointer-events-none absolute inset-0 -top-5">
                   {detectedFlags.map((flag, index) => (
                     <button
                       key={index}
@@ -499,7 +588,11 @@ export function VideoEvidenceProcessing({
 
             {/* Control Buttons */}
             <div className="flex items-center justify-center gap-4">
-              <Button variant="outline" size="sm" onClick={() => seekRelative(-5)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => seekRelative(-5)}
+              >
                 <SkipBack className="h-4 w-4" />
               </Button>
               <Button size="sm" onClick={togglePlay}>
@@ -509,10 +602,18 @@ export function VideoEvidenceProcessing({
                   <Play className="h-4 w-4" />
                 )}
               </Button>
-              <Button variant="outline" size="sm" onClick={() => seekRelative(5)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => seekRelative(5)}
+              >
                 <SkipForward className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setIsMuted((m) => !m)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsMuted((m) => !m)}
+              >
                 <Volume2 className="h-4 w-4" />
               </Button>
               <Button variant="outline" size="sm">

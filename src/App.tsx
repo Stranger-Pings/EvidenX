@@ -106,9 +106,9 @@ export default function App() {
 
   // Render current view
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
+    <div className="h-screen flex flex-col bg-background">
       <TopBar />
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
         {(() => {
           switch (appState.currentView) {
             case "registration":

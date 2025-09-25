@@ -24,6 +24,7 @@ import { Case, Evidence } from "../types/case";
 import EvidenceSummary from "./EvidenceSummary";
 import CaseProgressBadge from "./common/CaseProgressBadge";
 import CaseAccessBadge from "./common/CaseAccessBadge";
+import { VideoPlayerPopup } from "./VideoPlayerPopup";
 import ChatPanel from "./chat/ChatPanel";
 import { useSendQueryMutation } from "@/store/globalChat.api";
 
@@ -48,6 +49,12 @@ export function CaseDetailsPage({
   const [selectedEvidence, setSelectedEvidence] = useState<string[]>([]);
   const [chatQuery, setChatQuery] = useState("");
   const [isChatPanelOpen, setIsChatPanelOpen] = useState(false);
+  const [videoPlayerOpen, setVideoPlayerOpen] = useState(false);
+  const [videoTimestamp, setVideoTimestamp] = useState<number | undefined>(
+    undefined
+  );
+  const [currentVideoTitle, setCurrentVideoTitle] =
+    useState<string>("Evidence Video");
   const [chatHistory, setChatHistory] = useState([
     {
       query: "What time did the suspects enter the building?",
@@ -602,6 +609,18 @@ export function CaseDetailsPage({
           <MessageCircleMore className="!h-8 !w-8" />
         </Button>
       </div>
+
+      {/* Video Player Popup */}
+      <VideoPlayerPopup
+        isOpen={videoPlayerOpen}
+        onClose={() => {
+          setVideoPlayerOpen(false);
+          setVideoTimestamp(undefined); // reset timestamp on close
+        }}
+        seekToTimestamp={videoTimestamp}
+        title={currentVideoTitle}
+        evidenceId="VID_001"
+      />
     </>
   );
 }
