@@ -202,7 +202,7 @@ export function AudioComparison({
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10 flex-shrink-0">
         <div className="container mx-auto px-6 py-6">
           <div className="flex items-center gap-4 mb-4">
             <Button
@@ -267,7 +267,7 @@ export function AudioComparison({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto min-h-0">
         <div className="container mx-auto px-6 py-8">
           {/* Summary Statistics */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
