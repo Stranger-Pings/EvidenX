@@ -29,12 +29,13 @@ import ChatPanel from "./chat/ChatPanel";
 import { useSendQueryMutation } from "@/store/globalChat.api";
 
 interface CaseDetailsPageProps {
-  caseId: string;
+  caseId?: string;
   onBack: () => void;
   onViewTimeline: () => void;
   onViewVideo: (evidenceId: string) => void;
   onViewAudio: (evidenceId: string) => void;
   onCompareAudios: (evidenceIds: string[]) => void;
+  cases: any[];
 }
 
 export function CaseDetailsPage({
@@ -44,6 +45,7 @@ export function CaseDetailsPage({
   onViewVideo,
   onViewAudio,
   onCompareAudios,
+  cases,
 }: CaseDetailsPageProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEvidence, setSelectedEvidence] = useState<string[]>([]);
@@ -71,14 +73,18 @@ export function CaseDetailsPage({
   ]);
 
   const [sendQuery] = useSendQueryMutation();
-
-  const case_: Case | undefined = mockCases.find((c) => c.id === caseId);
-  const caseEvidence = mockEvidence.filter((e) => e.caseId === caseId);
-
-  if (!case_) {
+  if (!caseId) {
     return <div>Case not found</div>;
   }
 
+  const case_: Case | undefined = cases.find((c) => c.id === caseId);
+  const caseEvidence = mockEvidence.filter((e) => e.caseId === caseId);
+
+  // if (!case_) {
+  //   return <div>Case not found</div>;
+  // }
+
+  console.log(case_);
   const filteredEvidence = caseEvidence.filter(
     (evidence) =>
       evidence.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

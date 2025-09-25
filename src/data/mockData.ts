@@ -5,8 +5,7 @@ export const mockCases: Case[] = [
     id: "1",
     firNumber: "FIR/2024/001",
     title: "Commercial Property Theft Investigation",
-    summary:
-      "Multiple break-ins at commercial complex. CCTV footage and witness testimonies collected. Suspects identified through digital evidence.",
+    summary: "Multiple break-ins at commercial complex. CCTV footage and witness testimonies collected. Suspects identified through digital evidence.",
     petitioner: "Metro Shopping Complex Ltd.",
     accused: "John Doe, Jane Smith",
     investigatingOfficer: "Inspector Sarah Williams",
@@ -14,15 +13,14 @@ export const mockCases: Case[] = [
     status: "In-Progress",
     visibility: "Private",
     location: "Mumbai Central",
-    description:
-      "A series of break-ins occurred at the Metro Shopping Complex over several nights, resulting in significant property loss and damage. The investigation involved collecting and analyzing CCTV footage from multiple entry points, as well as recording detailed witness testimonies from security staff and shop owners. Digital evidence, including access logs and mobile device data, was examined to track suspect movements. Through cross-referencing surveillance video with digital records, investigators identified two primary suspects and established a timeline of events leading up to and following the incidents.",
+    created_at: "2025-09-25T09:43:51.841549Z",
+    updated_at: "2025-09-25T09:43:51.841549Z"
   },
   {
     id: "2",
     firNumber: "FIR/2024/002",
     title: "Vehicle Accident Investigation",
-    summary:
-      "Hit-and-run case involving pedestrian injury. Traffic camera footage and mobile phone evidence under analysis.",
+    summary: "Hit-and-run case involving pedestrian injury. Traffic camera footage and mobile phone evidence under analysis.",
     petitioner: "State Traffic Department",
     accused: "Unknown Driver",
     investigatingOfficer: "Sub-Inspector Raj Patel",
@@ -30,25 +28,9 @@ export const mockCases: Case[] = [
     status: "Open",
     visibility: "Public",
     location: "Delhi North",
-    description:
-      "A hit-and-run accident involving a pedestrian resulted in serious injury. The investigation involved collecting and analyzing traffic camera footage from the scene, as well as reviewing mobile phone data from the suspect's device. Digital evidence, including access logs and location history, was examined to track the suspect's movements. Through cross-referencing surveillance video with digital records, investigators identified the suspect and established a timeline of events leading up to and following the incident.",
-  },
-  {
-    id: "3",
-    firNumber: "FIR/2024/003",
-    title: "Fraud Investigation - Financial",
-    summary:
-      "Banking fraud involving forged documents and digital manipulation. Multiple witness testimonies recorded.",
-    petitioner: "Union Bank of India",
-    accused: "Michael Johnson",
-    investigatingOfficer: "Inspector Priya Sharma",
-    registeredDate: "2024-02-01",
-    status: "Closed",
-    visibility: "Private",
-    location: "Bangalore Urban",
-    description:
-      "A banking fraud involving forged documents and digital manipulation was reported. The investigation involved collecting and analyzing witness testimonies from multiple sources, as well as reviewing digital evidence from the suspect's device. Digital evidence, including access logs and location history, was examined to track the suspect's movements. Through cross-referencing digital records with witness testimonies, investigators identified the suspect and established a timeline of events leading up to and following the incident.",
-  },
+    created_at: "2025-09-25T09:43:51.841549Z",
+    updated_at: "2025-09-25T09:43:51.841549Z"
+  }
 ];
 
 export const mockEvidence: Evidence[] = [

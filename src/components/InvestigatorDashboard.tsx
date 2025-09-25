@@ -10,24 +10,30 @@ import {
 } from "./ui/select";
 import { Search, Plus } from "lucide-react";
 import { mockCases } from "../data/mockData";
-import { Case } from "../types/case";
 import { CaseCard } from "./CaseCard";
 
 interface InvestigatorDashboardProps {
   onCaseSelect: (caseId: string) => void;
   onRegisterCase?: () => void;
+  cases: any[];
+  isLoading: boolean;
 }
 
 export function InvestigatorDashboard({
   onCaseSelect,
   onRegisterCase,
+  cases,
+  isLoading,
 }: InvestigatorDashboardProps) {
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [visibilityFilter, setVisibilityFilter] = useState<string>("all");
 
   const filteredCases = useMemo(() => {
-    return mockCases.filter((case_) => {
+    return cases.filter((case_) => {
       const matchesSearch =
         case_.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         case_.firNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||

@@ -7,6 +7,7 @@ import { VideoEvidenceProcessing } from "./components/VideoEvidenceProcessing";
 import { AudioEvidenceProcessing } from "./components/AudioEvidenceProcessing";
 import { AudioComparison } from "./components/AudioComparison";
 import IncidentTimeline from "./components/IncidentTimeline";
+import { useGetCasesQuery } from "./store/cases.api";
 
 type ViewType =
   | "registration"
@@ -27,6 +28,10 @@ export default function App() {
   const [appState, setAppState] = useState({
     currentView: "dashboard",
   } as AppState);
+
+  const { data: cases, isLoading } = useGetCasesQuery();
+
+  console.log(cases);
 
   const evidenceIds = [
     "22c99559-efca-4e6b-a0df-75a2a3d15ba9",
@@ -124,6 +129,8 @@ export default function App() {
                 <InvestigatorDashboard
                   onCaseSelect={handleCaseSelect}
                   onRegisterCase={handleRegisterCase}
+                  cases={cases || []}
+                  isLoading={isLoading}
                 />
               );
 
@@ -133,12 +140,15 @@ export default function App() {
               }
               return (
                 <CaseDetailsPage
-                  caseId={appState.selectedCaseId}
+                  caseId={
+                    cases?.find((c) => c.id === appState.selectedCaseId)?.id
+                  }
                   onBack={handleBack}
                   onViewTimeline={handleViewTimeline}
                   onViewVideo={handleViewVideo}
                   onViewAudio={handleViewAudio}
                   onCompareAudios={handleCompareAudios}
+                  cases={cases || []}
                 />
               );
 
@@ -188,6 +198,7 @@ export default function App() {
                   caseId={appState.selectedCaseId}
                   onBack={handleBack}
                   onViewEvidence={handleViewEvidence}
+                  cases={cases || []}
                 />
               );
 

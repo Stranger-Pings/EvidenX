@@ -10,7 +10,9 @@ export interface Case {
   status: "Open" | "In-Progress" | "Closed";
   visibility: "Public" | "Private";
   location: string;
-  description: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Evidence {
