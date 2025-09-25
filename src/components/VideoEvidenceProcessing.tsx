@@ -234,8 +234,21 @@ export function VideoEvidenceProcessing({
     if (predefined) {
       setChatHistory((prev) => [...prev, predefined]);
       // When a predefined result is appended, surface its timestamps as flags
-      const color = nextIndex === 0 ? "bg-red-500" : "bg-orange-500";
-      const label = nextIndex === 0 ? "Result 1" : "Result 2";
+      // Color palette for different messages
+      const colorPalette = [
+        "bg-red-500",      // First message - red
+        "bg-orange-500",    // Second message - orange  
+        "bg-blue-500",      // Third message - blue
+        "bg-green-500",     // Fourth message - green
+        "bg-purple-500",    // Fifth message - purple
+        "bg-pink-500",      // Sixth message - pink
+        "bg-yellow-500",    // Seventh message - yellow
+        "bg-indigo-500",    // Eighth message - indigo
+        "bg-teal-500",      // Ninth message - teal
+        "bg-cyan-500",      // Tenth message - cyan
+      ];
+      const color = colorPalette[nextIndex] || "bg-gray-500";
+      const label = `Result ${nextIndex + 1}`;
       const newFlags = predefined.timestamps.map((t) => ({
         time: t,
         type: "person",
