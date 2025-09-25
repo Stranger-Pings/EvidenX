@@ -61,7 +61,8 @@ export const mockEvidence: Evidence[] = [
       "https://images.unsplash.com/photo-1734812070354-a0af3c243b2a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwb2xpY2UlMjBpbnZlc3RpZ2F0aW9uJTIwZXZpZGVuY2V8ZW58MXx8fHwxNzU4NjkzMzM2fDA&ixlib=rb-4.1.0&q=80&w=1080",
   },
   {
-    id: "ev2",
+    // id: "6852a8a3-63ed-4392-9edf-28737776b7ce",
+    id: '22c99559-efca-4e6b-a0df-75a2a3d15ba9',
     caseId: "1",
     type: "audio",
     name: "Witness Statement - Security Guard",
@@ -86,7 +87,7 @@ export const mockEvidence: Evidence[] = [
       "https://images.unsplash.com/photo-1731074803846-ac506947040d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXclMjBlbmZvcmNlbWVudCUyMGRvY3VtZW50JTIwZmlsZXN8ZW58MXx8fHwxNzU4NjkzMzQwfDA&ixlib=rb-4.1.0&q=80&w=1080",
   },
   {
-    id: "ev4",
+    id: "6852a8a3-63ed-4392-9edf-28737776b7ce",
     caseId: "1",
     type: "audio",
     name: "Witness Statement - Store Owner",
@@ -139,37 +140,69 @@ export const mockTimelineEvents: TimelineEvent[] = [
 
 export const mockAudioComparisons: AudioComparison[] = [
   {
-    id: "ac1",
-    witnessName: "Rajesh Kumar (Security Guard)",
-    witnessImage:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    audioId: "ev2",
-    summary:
-      "Security guard describes seeing two individuals enter through main entrance around 2:30 AM. Mentions suspicious behavior and unfamiliar faces.",
-    transcript:
-      "I was on duty that night when I saw two people coming through the main gate. They looked suspicious, wearing dark clothes and caps. I tried to question them but they rushed inside.",
-    contradictions: ["Time mentioned differs from CCTV timestamp"],
-    similarities: [
-      "Confirms two suspects",
-      "Dark clothing description matches video",
+    id: "d01888db-a20f-4bdc-96e6-00b1fbacd473",
+    caseId: "1",
+    mediaId1: "22c99559-efca-4e6b-a0df-75a2a3d15ba9",
+    mediaId2: "6852a8a3-63ed-4392-9edf-28737776b7ce",
+    witnesses: [
+      {
+        id: "ac1",
+        witnessName: "Investigation into Sarah Green's Disappearance",
+        witnessImage:
+          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+        audioId: "22c99559-efca-4e6b-a0df-75a2a3d15ba9",
+        summary:
+          "The witness last saw Sarah Green at 6 PM near the old life. Sarah mentioned she was going to meet a friend at a cafe on Main Street and appeared nervous as if she was being followed.",
+        transcript:
+          "i saw her yesterday i found six in the evening near the old life. she said she was heading to meet a friend at the cafe on main street. she seemed nervous like she was being followed.",
+        contradictions: [],
+        similarities: [
+          "Witness 2 saw Sarah at the same time and location, and noted similar behavior.",
+        ],
+        grayAreas: ["The term 'old life' is unclear and could be ambiguous."],
+      },
+      {
+        id: "ac2",
+        witnessName: "Investigation into Sarah Green's Disappearance",
+        witnessImage:
+          "https://images.unsplash.com/photo-1494790108755-2616b2abff16?w=150&h=150&fit=crop&crop=face",
+        audioId: "6852a8a3-63ed-4392-9edf-28737776b7ce",
+        summary:
+          "The witness last saw Sarah Green at 6 PM near the old life. Sarah mentioned she was going to meet a friend at a cafe on Main Street and appeared nervous as if she was being followed.",
+        transcript:
+          "i saw her yesterday i found six in the evening near the old life. she said she was heading to meet a friend at the cafe on main street. she seemed nervous like she was being followed.",
+        contradictions: [],
+        similarities: [
+          "Witness 1 saw Sarah at the same time and location, and noted similar behavior.",
+        ],
+        grayAreas: ["The term 'old life' is unclear and could be ambiguous."],
+      },
     ],
-    grayAreas: ["Unclear about exact location of entry"],
-  },
-  {
-    id: "ac2",
-    witnessName: "Meera Patel (Store Owner)",
-    witnessImage:
-      "https://images.unsplash.com/photo-1494790108755-2616b2abff16?w=150&h=150&fit=crop&crop=face",
-    audioId: "ev4",
-    summary:
-      "Store owner discovered the break-in next morning. Describes missing inventory and damaged property. Provides details about security arrangements.",
-    transcript:
-      "When I arrived at 9 AM, I found the lock broken and items missing from the store. The cash register was tampered with and several electronic items were gone.",
-    contradictions: ["Claims to have CCTV inside store but no footage found"],
-    similarities: [
-      "Confirms break-in occurred overnight",
-      "Missing items match reported theft",
+    detailedAnalysis: [
+      {
+        topic: "Time and location of last sighting",
+        witness1: "Witness 1 saw Sarah at 6 PM near the old life.",
+        witness2: "Witness 2 saw Sarah at 6 PM near the old life.",
+        status: "similarity",
+        details:
+          "Both witnesses reported seeing Sarah at the same time and location.",
+        confidence: 95,
+        importance: "high",
+      },
+      {
+        topic: "Sarah's destination and behavior",
+        witness1:
+          "Sarah was going to meet a friend at a cafe on Main Street and seemed nervous.",
+        witness2:
+          "Sarah was going to meet a friend at a cafe on Main Street and seemed nervous.",
+        status: "similarity",
+        details:
+          "Both witnesses reported the same destination and noted Sarah's nervous behavior.",
+        confidence: 90,
+        importance: "high",
+      },
     ],
-    grayAreas: ["Uncertain about exact time of discovery"],
+    created_at: "2025-09-25T17:19:21.666615Z",
+    updated_at: "2025-09-25T17:19:21.666615Z",
   },
 ];

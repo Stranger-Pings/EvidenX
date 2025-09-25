@@ -7,15 +7,15 @@ export interface Case {
   accused: string;
   investigatingOfficer: string;
   registeredDate: string;
-  status: 'Open' | 'In-Progress' | 'Closed';
-  visibility: 'Public' | 'Private';
+  status: "Open" | "In-Progress" | "Closed";
+  visibility: "Public" | "Private";
   location: string;
 }
 
 export interface Evidence {
   id: string;
   caseId: string;
-  type: 'document' | 'image' | 'video' | 'audio' | 'digital';
+  type: "document" | "image" | "video" | "audio" | "digital";
   name: string;
   url?: string;
   description: string;
@@ -33,8 +33,8 @@ export interface TimelineEvent {
   title: string;
   description: string;
   evidenceId?: string;
-  evidenceType?: Evidence['type'];
-  source: 'case_diary' | 'video' | 'audio' | 'document';
+  evidenceType?: Evidence["type"];
+  source: "case_diary" | "video" | "audio" | "document";
 }
 
 export interface ChatMessage {
@@ -46,7 +46,7 @@ export interface ChatMessage {
   audioTimestamps?: number[];
 }
 
-export interface AudioComparison {
+export interface Witness {
   id: string;
   witnessName: string;
   witnessImage: string;
@@ -56,4 +56,25 @@ export interface AudioComparison {
   contradictions: string[];
   similarities: string[];
   grayAreas: string[];
+}
+
+export interface DetailedAnalysisItem {
+  topic: string;
+  witness1: string;
+  witness2: string;
+  status: "similarity" | "contradiction" | "gray_area";
+  details: string;
+  confidence?: number;
+  importance?: "high" | "medium" | "low";
+}
+
+export interface AudioComparison {
+  id: string;
+  caseId: string;
+  mediaId1: string;
+  mediaId2: string;
+  witnesses: Witness[];
+  detailedAnalysis: DetailedAnalysisItem[];
+  created_at: string;
+  updated_at: string;
 }

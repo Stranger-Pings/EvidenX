@@ -136,8 +136,13 @@ speaker_0: "thank you your information will help us investigating further"`
             <Button variant="ghost" size="sm" onClick={onBack}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
+            {/* <h1 className="text-3xl font-bold bg-gradient-to-r from-audio-primary to-audio-secondary bg-clip-text text-transparent">
+                Audio Comparison Analysis
+              </h1> */}
             <div className="flex-1">
-              <h1>{evidence.name}</h1>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-audio-primary to-audio-secondary bg-clip-text text-transparent">
+                {evidence.name}
+              </h1>
               <p className="text-sm text-muted-foreground">
                 {evidence.description} • {evidence.fileSize} •{" "}
                 {evidence.duration}
@@ -318,13 +323,13 @@ speaker_0: "thank you your information will help us investigating further"`
           </div>
 
           {/* Transcript Panel */}
-          <div className="w-96 border bg-card flex flex-col overflow-hidden rounded-lg mt-4 mr-4">
+          <div className="w-96 border bg-card flex flex-col overflow-hidden rounded-lg mr-4 min-h-0">
             <div className="p-4 border-b flex-shrink-0">
               <h3 className="font-medium flex items-center gap-2">
                 <FileText className="h-4 w-4" /> Auto-Generated Transcript
               </h3>
             </div>
-            <ScrollArea className="flex-1 p-4 min-h-0 overflow-y-auto">
+            <ScrollArea className="flex-1 p-4 min-h-0">
               <div className="space-y-3 text-sm">
                 {transcript.split("\n").map((line, index) => {
                   const match = line.match(/^(speaker_\d+):\s*"(.*)"$/i);

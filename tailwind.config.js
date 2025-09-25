@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./index.html",
-    "./src/**/*.{ts,tsx,js,jsx}"
-  ],
+  content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
     extend: {
       colors: {
@@ -23,7 +20,18 @@ module.exports = {
         input: "var(--input)",
         ring: "var(--ring)",
         card: "var(--card)",
-        "card-foreground": "var(--card-foreground)"
+        "card-foreground": "var(--card-foreground)",
+        "audio-primary": "#3b82f6", // blue
+        "audio-secondary": "#9333ea", // purple
+        contradiction: "#ef4444", // red
+        "contradiction-muted": "#fee2e2",
+        "contradiction-border": "#fca5a5",
+        similarity: "#22c55e", // green
+        "similarity-muted": "#dcfce7",
+        "similarity-border": "#86efac",
+        "gray-area": "#facc15", // yellow
+        "gray-area-muted": "#fef9c3",
+        "gray-area-border": "#fde047",
       },
       borderRadius: {
         md: "calc(var(--radius) - 2px)",
@@ -37,5 +45,4 @@ module.exports = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-}
-
+};

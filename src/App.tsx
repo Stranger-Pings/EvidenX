@@ -28,6 +28,11 @@ export default function App() {
     currentView: "dashboard",
   } as AppState);
 
+  const evidenceIds = [
+    "22c99559-efca-4e6b-a0df-75a2a3d15ba9",
+    "6852a8a3-63ed-4392-9edf-28737776b7ce",
+  ];
+
   const navigateTo = (view: ViewType, params?: Partial<AppState>) => {
     setAppState((prev) => ({
       ...prev,
@@ -101,9 +106,9 @@ export default function App() {
 
   // Render current view
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       <TopBar />
-      <div className="flex-1 h-full">
+      <div className="flex-1 overflow-hidden">
         {(() => {
           switch (appState.currentView) {
             case "registration":
@@ -168,7 +173,7 @@ export default function App() {
               }
               return (
                 <AudioComparison
-                  evidenceIds={appState.selectedAudioIds}
+                  evidenceIds={evidenceIds}
                   onBack={handleBack}
                   onViewAudio={handleViewAudio}
                 />
