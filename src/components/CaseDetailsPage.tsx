@@ -385,9 +385,9 @@ export function CaseDetailsPage({
 
                 {/* Sticky Selection Summary */}
                 {selectedEvidence.length > 0 && (
-                  <div className="sticky top-[73px] z-10 bg-background pb-4 mb-4">
-                    <Card className="hover-lift">
-                      <CardContent className="p-4">
+                  <div className="bg-background pt-4">
+                    <Card className="">
+                      <CardContent className="!py-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium">
@@ -424,7 +424,7 @@ export function CaseDetailsPage({
                   <div className="space-y-4">
                     {/* Evidence Grid */}
                     {filteredEvidence.length > 0 && (
-                      <div className="py-3">
+                      <div className="pt-4">
                         <p className="text-sm text-muted-foreground">
                           💡 Click on evidence cards or checkboxes to select
                           multiple items for comparison
@@ -435,11 +435,7 @@ export function CaseDetailsPage({
                       {filteredEvidence.map((evidence) => (
                         <Card
                           key={evidence.id}
-                          className={`hover-lift cursor-pointer transition-all hover:shadow-md hover:bg-accent/50 flex flex-col h-full ${
-                            selectedEvidence.includes(evidence.id)
-                              ? "ring-2 ring-primary bg-primary/5"
-                              : ""
-                          }`}
+                          className={`hover-lift cursor-pointer flex flex-col h-full`}
                         >
                           <CardHeader className="pb-2 flex-shrink-0">
                             <div className="flex items-start justify-between">
@@ -457,15 +453,19 @@ export function CaseDetailsPage({
                                   </Badge>
                                 )}
                               </div>
-                              <input
-                                type="checkbox"
-                                checked={selectedEvidence.includes(evidence.id)}
-                                onChange={(e) => {
-                                  e.stopPropagation();
-                                  handleEvidenceSelect(evidence.id);
-                                }}
-                                className="w-4 h-4 rounded border border-input bg-background text-primary hover:cursor-pointer focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                              />
+                              {evidence.type === "audio" && (
+                                <input
+                                  type="checkbox"
+                                  checked={selectedEvidence.includes(
+                                    evidence.id
+                                  )}
+                                  onChange={(e) => {
+                                    e.stopPropagation();
+                                    handleEvidenceSelect(evidence.id);
+                                  }}
+                                  className="w-4 h-4 focus:ring-0 rounded  hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                                />
+                              )}
                             </div>
                             <CardTitle className="text-base line-clamp-2">
                               {evidence.name}
