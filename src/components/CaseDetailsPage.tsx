@@ -290,9 +290,9 @@ export function CaseDetailsPage({
               </div>
 
               <TabsContent value="overview" className="mt-4 flex-1">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="flex gap-6 w-full">
                   {/* Case Information */}
-                  <Card className="rounded-2xl shadow-sm bg-card">
+                  <Card className="rounded-2xl shadow-sm bg-card w-4/5">
                     <CardHeader>
                       <CardTitle className="text-xl font-semibold">
                         Case Overview
@@ -316,17 +316,19 @@ export function CaseDetailsPage({
                       </div>
                       <div>
                         <div className="text-sm text-muted-foreground mb-1">
-                          Summary:
+                          Description:
                         </div>
                         <p className="text-base leading-7 text-foreground">
-                          {case_.summary}
+                          {case_.description}
                         </p>
                       </div>
                     </CardContent>
                   </Card>
 
                   {/* Quick Stats */}
-                  <EvidenceSummary evidence={caseEvidence} />
+                  <div className="w-1/5">
+                    <EvidenceSummary evidence={caseEvidence} />
+                  </div>
                 </div>
               </TabsContent>
 

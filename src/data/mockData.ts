@@ -14,6 +14,8 @@ export const mockCases: Case[] = [
     status: "In-Progress",
     visibility: "Private",
     location: "Mumbai Central",
+    description:
+      "A series of break-ins occurred at the Metro Shopping Complex over several nights, resulting in significant property loss and damage. The investigation involved collecting and analyzing CCTV footage from multiple entry points, as well as recording detailed witness testimonies from security staff and shop owners. Digital evidence, including access logs and mobile device data, was examined to track suspect movements. Through cross-referencing surveillance video with digital records, investigators identified two primary suspects and established a timeline of events leading up to and following the incidents.",
   },
   {
     id: "2",
@@ -28,6 +30,8 @@ export const mockCases: Case[] = [
     status: "Open",
     visibility: "Public",
     location: "Delhi North",
+    description:
+      "A hit-and-run accident involving a pedestrian resulted in serious injury. The investigation involved collecting and analyzing traffic camera footage from the scene, as well as reviewing mobile phone data from the suspect's device. Digital evidence, including access logs and location history, was examined to track the suspect's movements. Through cross-referencing surveillance video with digital records, investigators identified the suspect and established a timeline of events leading up to and following the incident.",
   },
   {
     id: "3",
@@ -42,6 +46,8 @@ export const mockCases: Case[] = [
     status: "Closed",
     visibility: "Private",
     location: "Bangalore Urban",
+    description:
+      "A banking fraud involving forged documents and digital manipulation was reported. The investigation involved collecting and analyzing witness testimonies from multiple sources, as well as reviewing digital evidence from the suspect's device. Digital evidence, including access logs and location history, was examined to track the suspect's movements. Through cross-referencing digital records with witness testimonies, investigators identified the suspect and established a timeline of events leading up to and following the incident.",
   },
 ];
 

@@ -32,14 +32,16 @@ function Tile({
   } as const;
 
   return (
-    <div className={`rounded-2xl p-6 text-center ${bgMap[color]}`}>
+    <div
+      className={`w-full items-center rounded-2xl p-2 flex flex-row gap-2 text-center ${bgMap[color]}`}
+    >
       <div
-        className={`mx-auto mb-4 size-12 rounded-full flex items-center justify-center ${bubbleMap[color]}`}
+        className={`size-12 mr-2 rounded-full flex items-center justify-center ${bubbleMap[color]}`}
       >
         {icon}
       </div>
-      <div className="text-2xl font-bold tracking-tight">{count}</div>
-      <div className="text-sm text-muted-foreground">{label}</div>
+      <div className="text-2xl font-bold tracking-tight mr-2">{count}</div>
+      <div className="text-base text-muted-foreground font-medium">{label}</div>
     </div>
   );
 }
@@ -51,14 +53,14 @@ export default function EvidenceSummary({ evidence }: EvidenceSummaryProps) {
   const imageCount = evidence.filter((e) => e.type === "image").length;
 
   return (
-    <Card className="shadow-sm bg-card">
+    <Card className="shadow-sm bg-card w-full h-full">
       <CardHeader>
         <CardTitle className="text-xl font-semibold">
           Evidence Summary
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-5">
+        <div className="flex flex-col gap-2">
           <Tile
             color="blue"
             icon={<Video className="h-6 w-6 text-blue-600" />}
