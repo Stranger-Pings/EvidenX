@@ -17,6 +17,7 @@ export interface Evidence {
   caseId: string;
   type: 'document' | 'image' | 'video' | 'audio' | 'digital';
   name: string;
+  url?: string;
   description: string;
   uploadDate: string;
   fileSize: string;
