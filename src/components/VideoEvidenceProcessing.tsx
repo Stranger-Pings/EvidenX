@@ -132,7 +132,7 @@ export function VideoEvidenceProcessing({
 
   const evidence: Evidence | undefined = dataValuesEvidence.find(
     (e) => e.id === evidenceId
-  );
+  ) || dataValuesEvidence[0];
 
   if (!evidence) {
     return <div>Evidence not found</div>;

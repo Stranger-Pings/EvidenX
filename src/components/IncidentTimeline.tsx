@@ -58,7 +58,7 @@ interface IncidentTimelineProps {
   onViewEvidence: (evidenceId: string, evidenceType: string) => void;
 }
 
-const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ onBack }) => {
+const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ onBack, onViewEvidence }) => {
   const [selectedView, setSelectedView] = useState<"timeline" | "month">(
     "timeline"
   );
@@ -1173,16 +1173,15 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ onBack }) => {
                         {selectedEvent.description}
                       </p>
                     </div>
-
-                    {/* <div className="pt-3 ">
-                      <Button
+                    <div className="pt-3 ">
+                      <Button onClick={() => onViewEvidence(selectedEvent.evidence, selectedEvent.type)}
                         variant="secondary"
                         className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-700 text-white text-sm rounded-lg hover:bg-blue-800"
                       >
                         <Eye className="w-4 h-4" />
                         View Evidence
                       </Button>
-                    </div> */}
+                    </div>
                   </div>
                 ) : (
                   <p className="text-gray-500 text-sm">
