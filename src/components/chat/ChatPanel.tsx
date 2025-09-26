@@ -31,11 +31,17 @@ export default function ChatPanel({
   chatQuery,
   onChatQueryChange,
   onSubmit,
+  setVideoTimestamp,
+  setCurrentVideoTitle,
+  setVideoPlayerOpen,
 }: {
   chatHistory: ChatItem[];
   chatQuery: string;
   onChatQueryChange: (v: string) => void;
   onSubmit: () => void;
+  setVideoTimestamp: (timestamp: number) => void;
+  setCurrentVideoTitle: (title: string) => void;
+  setVideoPlayerOpen: (open: boolean) => void;
 }) {
   return (
     <div className="w-80 bg-gradient-to-b from-blue-50 to-blue-100/40 border-r flex flex-col h-full">
@@ -65,6 +71,11 @@ export default function ChatPanel({
                       variant="link"
                       size="sm"
                       className="p-0 h-auto text-blue-200 underline mt-2"
+                      onClick={() => {
+                        setVideoTimestamp(chat.videoTimestamp || 0);
+                        setCurrentVideoTitle("CCTV Footage - Main Entrance");
+                        setVideoPlayerOpen(true);
+                      }}
                     >
                       Jump to video ({Math.floor(chat.videoTimestamp / 60)}:
                       {(chat.videoTimestamp % 60).toString().padStart(2, "0")})

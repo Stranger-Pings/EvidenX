@@ -75,6 +75,7 @@ export function VideoEvidenceProcessing({
   }>({ width: 0, height: 0 });
   const [chatQuery, setChatQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  // const [chatHistory, setChatHistory] = useState<ChatEntry[]>([]);
 
   const HARDCODED_CHATS: ChatEntry[] = [
     {

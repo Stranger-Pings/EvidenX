@@ -6,7 +6,6 @@ import { Input } from "./ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import {
   Search,
-  Filter,
   Upload,
   Play,
   FileText,
@@ -189,6 +188,9 @@ export function CaseDetailsPage({
             chatQuery={chatQuery}
             onChatQueryChange={setChatQuery}
             onSubmit={handleChatSubmit}
+            setVideoTimestamp={setVideoTimestamp}
+            setCurrentVideoTitle={setCurrentVideoTitle}
+            setVideoPlayerOpen={setVideoPlayerOpen}
           />
         )}
 
