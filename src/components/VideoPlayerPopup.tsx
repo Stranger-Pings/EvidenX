@@ -26,7 +26,7 @@ interface VideoPlayerPopupProps {
 export function VideoPlayerPopup({
   isOpen,
   onClose,
-  videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", // Sample video
+  videoUrl = "https://evidenx.s3.us-east-1.amazonaws.com/CCTV_Master.mp4", // Sample video
   seekToTimestamp,
   title = "Evidence Video",
   evidenceId,
