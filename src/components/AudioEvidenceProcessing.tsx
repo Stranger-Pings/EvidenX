@@ -41,12 +41,17 @@ speaker_1: "she seemed nervous like she was being followed"
 speaker_0: "thank you your information will help us investigating further"`
   );
   const [followUpQuestions, setFollowUpQuestions] = useState([
-    "Can you describe the tools or bag you mentioned in more detail?",
-    "What was your exact position when you first spotted the suspects?",
-    "Have you seen these individuals before at the complex?",
-    "What security protocols were you following that night?",
-    "Did you check the CCTV monitors during or after the incident?",
+    "You mentioned hearing a noise—can you describe exactly what it sounded like?",
+    "Who else was present when this interaction took place?",
+    "Did you notice anything unusual about the suspects’ behavior or appearance?",
+    "How much time passed between the noise you heard and when you saw the individuals?",
+    "Were there any objects, vehicles, or items nearby that stood out to you?",
+    "Can you clarify why you didn’t immediately report the incident?",
+    "Did you interact directly with any of the suspects, and if so, what did they say?",
+    "Have you ever had previous conflicts or interactions with any of these individuals?",
+    "What steps did you take immediately after the suspects left the area?",
   ]);
+
   const [newQuestion, setNewQuestion] = useState("");
   const [showQuestions, setShowQuestions] = useState(false);
 
