@@ -6,7 +6,6 @@ import { Input } from "./ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import {
   Search,
-  Filter,
   Upload,
   Play,
   FileText,
@@ -156,7 +155,14 @@ export function CaseDetailsPage({
     <>
       <div className="relative flex h-full bg-background">
         {/* Chat Panel */}
-        {isChatPanelOpen && <ChatPanel caseId={caseId || ""} />}
+        {isChatPanelOpen && (
+          <ChatPanel
+          caseId={caseId || ""}
+            setVideoTimestamp={setVideoTimestamp}
+            setCurrentVideoTitle={setCurrentVideoTitle}
+            setVideoPlayerOpen={setVideoPlayerOpen}
+          />
+        )}
 
         {/* Main Content */}
         <div className="flex-1 flex p-6 pt-8 flex-col h-full overflow-y-auto bg-background">
@@ -511,8 +517,8 @@ export function CaseDetailsPage({
                                 {evidence?.type === "image" && (
                                   <Button
                                     size="sm"
-                                    variant="outline"
-                                    className="w-full"
+                                    variant="secondary"
+                                    className="w-full bg-secondary text-card"
                                     onClick={(e: {
                                       stopPropagation: () => void;
                                     }) => {

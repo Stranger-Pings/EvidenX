@@ -28,56 +28,17 @@ function Bubble({
   return <div className={`${base} ${styles}`}>{children}</div>;
 }
 
-export default function ChatPanel({ caseId }: { caseId: string }) {
-  const [chatHistory, setChatHistory] = useState<ChatItem[]>([
-    {
-      query: "What time did the suspects enter the building?",
-      response:
-        "Based on CCTV analysis, two suspects entered at 02:32 AM through the main entrance. Video timestamp: 02:32:15",
-      videoTimestamp: 9135,
-    },
-    {
-      query: "Are there any contradictions in witness statements?",
-      response:
-        "Security guard mentions 2:30 AM while store owner suggests earlier timing. Audio evidence shows discrepancy in timeline accounts.",
-      audioTimestamps: [145, 670],
-    },
-  ]);
-  const [chatQuery, setChatQuery] = useState("");
-  const [sendQuery, { isLoading: isSending }] = useSendQueryMutation();
-
-  const handleSubmit = async () => {
-    if (!chatQuery.trim()) return;
-    try {
-      const res = await sendQuery({ caseId, query: chatQuery }).unwrap();
-      const botText = res?.message;
-
-      const ts = Array.isArray((res as any)?.videoTimestamps)
-        ? (res as any).videoTimestamps[0]
-        : (res as any)?.videoTimestamp;
-      const audioTs = Array.isArray((res as any)?.audioTimestamps)
-        ? (res as any).audioTimestamps
-        : [];
-
-      setChatHistory((prev) => [
-        ...prev,
-        typeof ts === "number"
-          ? { query: chatQuery, response: botText, videoTimestamp: ts }
-          : { query: chatQuery, response: botText, audioTimestamps: audioTs },
-      ]);
-    } catch (e) {
-      setChatHistory((prev) => [
-        ...prev,
-        {
-          query: chatQuery,
-          response: "Sorry, I couldn't fetch an answer right now.",
-          audioTimestamps: [],
-        },
-      ]);
-    }
-    setChatQuery("");
-  };
-
+export default function ChatPanel({
+  caseId,
+  setVideoTimestamp,
+  setCurrentVideoTitle,
+  setVideoPlayerOpen,
+}: {
+  caseId: string;
+  setVideoTimestamp: (timestamp: number) => void;
+  setCurrentVideoTitle: (title: string) => void;
+  setVideoPlayerOpen: (open: boolean) => void;
+}) {
   return (
     <div className="w-80 bg-gradient-to-b from-blue-50 to-blue-100/40 border-r flex flex-col h-full">
       <div className="p-4 flex-shrink-0">
@@ -106,6 +67,11 @@ export default function ChatPanel({ caseId }: { caseId: string }) {
                       variant="link"
                       size="sm"
                       className="p-0 h-auto text-blue-200 underline mt-2"
+                      onClick={() => {
+                        setVideoTimestamp(chat.videoTimestamp || 0);
+                        setCurrentVideoTitle("CCTV Footage - Main Entrance");
+                        setVideoPlayerOpen(true);
+                      }}
                     >
                       Jump to video ({Math.floor(chat.videoTimestamp / 60)}:
                       {(chat.videoTimestamp % 60).toString().padStart(2, "0")})
