@@ -1,11 +1,9 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
-import { Badge } from "./ui/badge";
+import { Slider } from "./ui/slider";
 import {
-  ArrowLeft,
   Play,
   Pause,
   SkipBack,
@@ -13,72 +11,131 @@ import {
   Volume2,
   Settings,
   MessageSquare,
-  Search,
   Image as ImageIcon,
-  Flag,
-  User,
-  Zap,
 } from "lucide-react";
-import { mockEvidence } from "../data/mockData";
-import { Evidence } from "../types/case";
-import { ImageWithFallback } from "./common/ImageWithFallback";
+import { Case, Evidence } from "../types/case";
+import GradientHeader from "./common/GradientHeader";
+import BackButton from "./common/BackButton";
+import { useSendQueryMutation } from "@/store/globalChat.api";
 
 interface VideoEvidenceProcessingProps {
   evidenceId: string;
   onBack: () => void;
+  selectedCase?: Case;
+}
+
+type ChatEntry = {
+  query: string;
+  response: string;
+  timestamps: number[];
+};
+
+type BoundingBox = {
+  time: number;
+  coords: [number, number, number, number];
+  showForSeconds?: number;
+};
+
+function Bubble({
+  children,
+  variant,
+}: {
+  children: React.ReactNode;
+  variant: "query" | "response";
+}) {
+  const base =
+    "relative w-fit max-w-[220px] px-3 py-2 text-sm leading-5 rounded-2xl shadow-sm";
+  const styles =
+    variant === "query"
+      ? "bg-blue-600 text-white shadow-md after:content-[''] after:absolute after:-right-2 after:top-3 after:border-y-8 after:border-y-transparent after:border-l-8 after:border-l-blue-600"
+      : "bg-white text-foreground border border-blue-100 after:content-[''] after:absolute after:-left-2 after:top-3 after:border-y-8 after:border-y-transparent after:border-r-8 after:border-r-white";
+  return <div className={`${base} ${styles}`}>{children}</div>;
 }
 
 export function VideoEvidenceProcessing({
   evidenceId,
   onBack,
+  selectedCase,
 }: VideoEvidenceProcessingProps) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const posterInputRef = useRef<HTMLInputElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(125); // Mock current time in seconds
-  const [duration] = useState(9255); // Mock duration in seconds (2:34:15)
+  const [isMuted, setIsMuted] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  // const [posterUrl, setPosterUrl] = useState<string | undefined>(undefined);
+  const [videoSize, setVideoSize] = useState<{ width: number; height: number }>(
+    {
+      width: 0,
+      height: 0,
+    }
+  );
+  const [containerSize, setContainerSize] = useState<{
+    width: number;
+    height: number;
+  }>({ width: 0, height: 0 });
   const [chatQuery, setChatQuery] = useState("");
-  const [chatHistory, setChatHistory] = useState([
-    {
-      query: "Find person in red jacket",
-      response: "Found person in red jacket at following timestamps:",
-      timestamps: [45, 128, 267, 445],
-    },
-    {
-      query: "When do the suspects appear?",
-      response: "Two suspects visible in the following segments:",
-      timestamps: [125, 189, 234],
-    },
-  ]);
-  const [detectedFlags, setDetectedFlags] = useState([
-    {
-      time: 45,
-      type: "person",
-      label: "Person in red jacket",
-      color: "bg-red-500",
-    },
-    { time: 125, type: "person", label: "Suspect 1", color: "bg-orange-500" },
-    { time: 189, type: "person", label: "Suspect 2", color: "bg-orange-500" },
-    {
-      time: 234,
-      type: "activity",
-      label: "Suspicious activity",
-      color: "bg-yellow-500",
-    },
-    {
-      time: 267,
-      type: "person",
-      label: "Person in red jacket",
-      color: "bg-red-500",
-    },
-    {
-      time: 445,
-      type: "person",
-      label: "Person in red jacket",
-      color: "bg-red-500",
-    },
-  ]);
+  const [isLoading, setIsLoading] = useState(false);
+  // const [chatHistory, setChatHistory] = useState<ChatEntry[]>([]);
 
-  const evidence: Evidence | undefined = mockEvidence.find(
+  const HARDCODED_CHATS: ChatEntry[] = [
+    {
+      query: "Identify girl in pink top, wide leg blue jeans, white sneakers",
+      response: "Found person in pink top at following timestamps:",
+      timestamps: [398, 613],
+    },
+    {
+      query: "When did she leave the room?",
+      response: "Seems like she left at 11:14:15",
+      timestamps: [812],
+    },
+    {
+      query: "Show me all people wearing dark clothing",
+      response:
+        "Detected 3 individuals in dark clothing at the following timestamps:",
+      timestamps: [120, 245, 380, 520],
+    },
+    {
+      query: "Find any suspicious activity near the entrance",
+      response: "Detected unusual movement patterns at these times:",
+      timestamps: [150, 300, 450],
+    },
+    {
+      query: "Identify anyone carrying bags or packages",
+      response: "Found 2 individuals with bags at these timestamps:",
+      timestamps: [200, 350, 500],
+    },
+    {
+      query: "Show me all vehicles in the parking area",
+      response: "Detected 4 vehicles entering and exiting:",
+      timestamps: [100, 250, 400, 550],
+    },
+    {
+      query: "Find any interactions between people",
+      response: "Detected 5 interaction events:",
+      timestamps: [180, 320, 420, 480, 600],
+    },
+    {
+      query: "Show me anyone looking at the camera",
+      response: "Found 2 instances of people looking directly at camera:",
+      timestamps: [220, 380],
+    },
+  ];
+
+  const [chatHistory, setChatHistory] = useState<ChatEntry[]>([]);
+  const [sendQuery] = useSendQueryMutation();
+
+  const [detectedFlags, setDetectedFlags] = useState<
+    { time: number; type: string; label: string; color: string }[]
+  >([]);
+
+  const evidence: Evidence | undefined = selectedCase?.evidence?.find(
     (e) => e.id === evidenceId
+  );
+
+  const [posterUrl, setPosterUrl] = useState<string | undefined>(
+    evidence?.thumbnail || undefined
   );
 
   if (!evidence) {
@@ -86,43 +143,139 @@ export function VideoEvidenceProcessing({
   }
 
   const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
+    const totalSeconds = Math.floor(seconds || 0);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
     return `${hours.toString().padStart(2, "0")}:${minutes
       .toString()
       .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const clamp = (val: number, min = 0, max = Number.MAX_SAFE_INTEGER) =>
+    Math.min(Math.max(val, min), max);
+
   const handleSeekToTime = (time: number) => {
-    setCurrentTime(time);
+    const safe = clamp(time, 0, duration || 0);
+    if (videoRef.current) {
+      videoRef.current.currentTime = safe;
+    }
+    setCurrentTime(safe);
   };
 
-  const handleChatSubmit = () => {
-    if (!chatQuery.trim()) return;
-
-    // Mock response based on query
-    let mockResponse =
-      "I found relevant matches in the video at the following timestamps:";
-    let mockTimestamps = [178, 234, 389];
-
-    if (
-      chatQuery.toLowerCase().includes("door") ||
-      chatQuery.toLowerCase().includes("entrance")
-    ) {
-      mockResponse = "Door/entrance activity detected at:";
-      mockTimestamps = [45, 125, 267];
+  const togglePlay = async () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      try {
+        await video.play();
+      } catch {
+        // ignore play rejection
+      }
+    } else {
+      video.pause();
     }
+  };
 
-    setChatHistory((prev) => [
-      ...prev,
-      {
+  const seekRelative = (deltaSeconds: number) => {
+    const video = videoRef.current;
+    if (!video) return;
+    const target = clamp(video.currentTime + deltaSeconds, 0, duration || 0);
+    video.currentTime = target;
+    setCurrentTime(target);
+  };
+
+  // Keep local state in sync with the video element
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const onLoaded = () => {
+      setDuration(video.duration || 0);
+      setVideoSize({
+        width: video.videoWidth || 0,
+        height: video.videoHeight || 0,
+      });
+    };
+    const onTime = () => setCurrentTime(video.currentTime || 0);
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+    const onEnded = () => setIsPlaying(false);
+    video.addEventListener("loadedmetadata", onLoaded);
+    video.addEventListener("timeupdate", onTime);
+    video.addEventListener("play", onPlay);
+    video.addEventListener("pause", onPause);
+    video.addEventListener("ended", onEnded);
+    return () => {
+      video.removeEventListener("loadedmetadata", onLoaded);
+      video.removeEventListener("timeupdate", onTime);
+      video.removeEventListener("play", onPlay);
+      video.removeEventListener("pause", onPause);
+      video.removeEventListener("ended", onEnded);
+    };
+  }, []);
+
+  // Track container size for correct overlay placement with object-contain
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () =>
+      setContainerSize({ width: el.clientWidth, height: el.clientHeight });
+    update();
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(update);
+      ro.observe(el);
+      return () => ro.disconnect();
+    }
+  }, []);
+
+  // Initialize poster from localStorage (persist across sessions)
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(`poster:${evidenceId}`);
+      setPosterUrl(stored || undefined);
+    } catch {
+      setPosterUrl(undefined);
+    }
+  }, [evidenceId]);
+
+  const handlePosterFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setPosterUrl(dataUrl);
+      try {
+        localStorage.setItem(`poster:${evidenceId}`, dataUrl);
+      } catch {}
+    };
+    reader.readAsDataURL(file);
+    // reset input so re-uploading the same file triggers change
+    e.currentTarget.value = "";
+  };
+
+  const handleChatSubmit = async () => {
+    if (!chatQuery.trim() || isLoading) return;
+    setIsLoading(true);
+    try {
+      const res: any = await sendQuery({
+        caseId: evidence.caseId,
         query: chatQuery,
-        response: mockResponse,
-        timestamps: mockTimestamps,
-      },
-    ]);
-    setChatQuery("");
+      });
+      const message = res?.data?.message ?? "Sorry, I couldn't find that.";
+      setChatHistory((prev) => [
+        ...prev,
+        { query: chatQuery, response: message, timestamps: [] },
+      ]);
+    } catch (e) {
+      setChatHistory((prev) => [
+        ...prev,
+        { query: chatQuery, response: "Request failed.", timestamps: [] },
+      ]);
+    } finally {
+      setChatQuery("");
+      setIsLoading(false);
+    }
   };
 
   const handleImageUpload = () => {
@@ -139,48 +292,71 @@ export function VideoEvidenceProcessing({
   };
 
   return (
-    <div className="flex h-full bg-background">
+    <div className="flex h-full bg-background space-x-3 p-3">
       {/* Chat Panel */}
-      <div className="w-80 border-r bg-card flex flex-col">
-        <div className="p-4 border-b">
+      <div className="w-80 bg-gradient-to-b from-blue-50 to-blue-100/40 border-r flex flex-col h-full">
+        <div className="p-4 flex-shrink-0">
           <h3 className="font-medium flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" />
+            <MessageSquare className="h-4 w-4 text-blue-600" />
             Video Analysis
           </h3>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-[11px] text-muted-foreground mt-1">
             Search for people, objects, or activities
           </p>
         </div>
 
-        <ScrollArea className="flex-1 p-4">
+        <ScrollArea className="flex-1 px-3 pb-3 min-h-0">
           <div className="space-y-4">
             {chatHistory.map((chat, index) => (
               <div key={index} className="space-y-2">
-                <div className="bg-primary text-primary-foreground p-3 rounded-lg text-sm">
-                  {chat.query}
+                <div className="flex justify-end">
+                  <Bubble variant="query">{chat.query}</Bubble>
                 </div>
-                <div className="bg-muted p-3 rounded-lg text-sm space-y-2">
-                  <p>{chat.response}</p>
-                  <div className="flex flex-wrap gap-1">
-                    {chat.timestamps.map((timestamp, idx) => (
-                      <Button
-                        key={idx}
-                        variant="link"
-                        size="sm"
-                        className="p-0 h-auto text-blue-400 underline"
-                        onClick={() => handleSeekToTime(timestamp)}
-                      >
-                        {formatTime(timestamp)}
-                      </Button>
-                    ))}
-                  </div>
+                <div className="flex justify-start">
+                  <Bubble variant="response">
+                    <div>{chat.response}</div>
+                    {chat.timestamps.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {chat.timestamps.map((timestamp, idx) => (
+                          <Button
+                            key={idx}
+                            variant="link"
+                            size="sm"
+                            className="p-0 h-auto text-blue-200 underline"
+                            onClick={() => handleSeekToTime(timestamp)}
+                          >
+                            {formatTime(timestamp)}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
+                  </Bubble>
                 </div>
               </div>
             ))}
+
+            {/* Loading state */}
+            {isLoading && (
+              <div className="space-y-2">
+                <div className="flex justify-end">
+                  <Bubble variant="query">{chatQuery}</Bubble>
+                </div>
+                <div className="flex justify-start">
+                  <Bubble variant="response">
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-blue-600"></div>
+                      <span className="text-muted-foreground">
+                        Intelligence analysis...
+                      </span>
+                    </div>
+                  </Bubble>
+                </div>
+              </div>
+            )}
           </div>
         </ScrollArea>
 
-        <div className="p-4 border-t space-y-3">
+        <div className="p-3 border-t flex-shrink-0 bg-gradient-to-t from-blue-50/60 to-transparent space-y-3">
           {/* Image Upload */}
           <div>
             <label className="text-sm font-medium mb-2 block">
@@ -201,20 +377,28 @@ export function VideoEvidenceProcessing({
 
           {/* Text Query */}
           <div>
-            <label className="text-sm font-medium mb-2 block">
-              Or describe what to find:
-            </label>
             <div className="flex gap-2">
               <Input
-                placeholder="e.g., person in blue shirt..."
+                placeholder="Ask about evidence..."
                 value={chatQuery}
                 onChange={(e) => setChatQuery(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleChatSubmit()}
-                className="flex-1"
-                size={undefined}
+                onKeyPress={(e) =>
+                  e.key === "Enter" && !isLoading && handleChatSubmit()
+                }
+                className="flex-1 h-9 rounded-md bg-white"
+                disabled={isLoading}
               />
-              <Button size="sm" onClick={handleChatSubmit}>
-                <Search className="h-4 w-4" />
+              <Button
+                size="sm"
+                onClick={handleChatSubmit}
+                disabled={isLoading || !chatQuery.trim()}
+                className="h-9 px-3 rounded-md bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {isLoading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                ) : (
+                  "Send"
+                )}
               </Button>
             </div>
           </div>
@@ -222,70 +406,153 @@ export function VideoEvidenceProcessing({
       </div>
 
       {/* Video Player Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col bg-card rounded-lg">
         {/* Header */}
-        <div className="border-b p-4 flex-shrink-0">
+        <div className="border-b p-6 pt-8 flex flex-col">
+          <BackButton onBack={onBack} location="Case" />
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={onBack}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
             <div className="flex-1">
-              <h1>{evidence.name}</h1>
-              <p className="text-sm text-muted-foreground">
+              <GradientHeader title={evidence.name} />
+              <p className="text-base text-muted-foreground">
                 {evidence.description} • {evidence.fileSize}
               </p>
             </div>
-            <Badge variant="secondary">{evidence.type}</Badge>
           </div>
         </div>
 
-        {/* Video Player */}
-        <div className="flex-1 flex flex-col p-4 overflow-hidden">
-          <div className="flex-1 bg-black rounded-lg relative overflow-hidden mb-4 min-h-0">
-            {/* Mock video placeholder */}
-            <div className="w-full h-full flex items-center justify-center">
-              <ImageWithFallback
-                src={evidence.thumbnail || ""}
-                alt="Video frame"
-                className="max-w-full max-h-full object-contain"
-              />
-              {/* Play overlay */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Button
-                  size="lg"
-                  className="rounded-full w-16 h-16"
-                  onClick={() => setIsPlaying(!isPlaying)}
-                >
-                  {isPlaying ? (
-                    <Pause className="h-6 w-6" />
-                  ) : (
-                    <Play className="h-6 w-6" />
-                  )}
-                </Button>
-              </div>
+        {/* Video Content */}
+        <div className="flex-1 flex flex-col p-4 pb-0">
+          {/* Video Player */}
+          <div
+            className="bg-black rounded-lg relative overflow-hidden h-[60vh] mb-6"
+            ref={containerRef}
+          >
+            <video
+              ref={videoRef}
+              src={evidence?.url || ""}
+              poster={posterUrl || evidence?.thumbnail || ""}
+              className="absolute inset-0 w-full h-full object-contain bg-black"
+              muted={isMuted}
+              playsInline
+              preload="metadata"
+            />
+            {/* Bounding box overlay near 398s */}
+            {(() => {
+              const boxes: BoundingBox[] = [
+                {
+                  time: 398,
+                  coords: [693.59, 36.56, 1002.14, 335.39],
+                  showForSeconds: 1,
+                },
+                {
+                  time: 613,
+                  coords: [1293.59, 136.56, 1602.14, 635.39],
+                  showForSeconds: 1,
+                },
+                {
+                  time: 812,
+                  coords: [693.59, 36.56, 1002.14, 335.39],
+                  showForSeconds: 1,
+                },
+              ];
+              const visible = boxes.filter(
+                (b) =>
+                  Math.abs(currentTime - b.time) <= (b.showForSeconds ?? 1) / 2
+              );
+              if (
+                !visible.length ||
+                !videoSize.width ||
+                !videoSize.height ||
+                !containerSize.width ||
+                !containerSize.height
+              ) {
+                return null;
+              }
+              const scale = Math.min(
+                containerSize.width / videoSize.width,
+                containerSize.height / videoSize.height
+              );
+              const displayWidth = videoSize.width * scale;
+              const displayHeight = videoSize.height * scale;
+              const offsetX = (containerSize.width - displayWidth) / 2;
+              const offsetY = (containerSize.height - displayHeight) / 2;
+              return (
+                <div className="absolute inset-0 pointer-events-none">
+                  {visible.map((b, i) => {
+                    const [x1, y1, x2, y2] = b.coords;
+                    const left =
+                      offsetX + (x1 / videoSize.width) * displayWidth;
+                    const top =
+                      offsetY + (y1 / videoSize.height) * displayHeight;
+                    const width = ((x2 - x1) / videoSize.width) * displayWidth;
+                    const height =
+                      ((y2 - y1) / videoSize.height) * displayHeight;
+                    return (
+                      <div
+                        key={i}
+                        className="absolute"
+                        style={{
+                          left,
+                          top,
+                          width,
+                          height,
+                          border: "2px solid #39FF14",
+                          backgroundColor: "rgba(57,255,20,0.12)",
+                          boxShadow:
+                            "0 0 10px 2px rgba(57,255,20,0.8), inset 0 0 0 2px rgba(57,255,20,0.5)",
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              );
+            })()}
+            {/* Play overlay */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <Button
+                size="lg"
+                className="rounded-full w-16 h-16 pointer-events-auto"
+                onClick={togglePlay}
+              >
+                {isPlaying ? (
+                  <Pause className="h-6 w-6" />
+                ) : (
+                  <Play className="h-6 w-6" />
+                )}
+              </Button>
             </div>
           </div>
 
           {/* Video Controls */}
-          <div className="space-y-4 flex-shrink-0 overflow-y-auto">
-            {/* Timeline with flags */}
+          <div className="space-y-2 mt-4 mb-0">
+            {/* Timeline with slider and flags */}
             <div className="relative ml-4 mt-2">
-              <div className="w-full bg-muted rounded-full h-2 relative">
-                <div
-                  className="bg-primary h-2 rounded-full"
-                  style={{ width: `${(currentTime / duration) * 100}%` }}
-                />
-                {/* Detection flags */}
-                {detectedFlags.map((flag, index) => (
-                  <button
-                    key={index}
-                    className={`absolute top-0 w-3 h-3 rounded-full ${flag.color} transform -translate-y-0.5 -translate-x-1.5 hover:scale-125 transition-transform`}
-                    style={{ left: `${(flag.time / duration) * 100}%` }}
-                    onClick={() => handleSeekToTime(flag.time)}
-                    title={`${flag.label} - ${formatTime(flag.time)}`}
-                  />
-                ))}
-              </div>
+              <Slider
+                value={[currentTime]}
+                min={0}
+                max={Math.max(duration, 0.01)}
+                step={0.1}
+                onValueChange={(v) => handleSeekToTime(v[0] ?? 0)}
+                aria-label="Seek"
+                className="h-4"
+                trackClassName="!bg-muted !h-3 "
+                rangeClassName="!bg-primary-2"
+                thumbClassName="!border-blue-700 !bg-blue-700 rounded-full h-3"
+              />
+              {/* Detection flags overlay */}
+              {duration > 0 && (
+                <div className="pointer-events-none absolute inset-0 -top-5">
+                  {detectedFlags.map((flag, index) => (
+                    <button
+                      key={index}
+                      className={`pointer-events-auto absolute top-1/2 w-3 h-3 rounded-full ${flag.color} -translate-y-1/2 -translate-x-1.5 hover:scale-125 transition-transform`}
+                      style={{ left: `${(flag.time / duration) * 100}%` }}
+                      onClick={() => handleSeekToTime(flag.time)}
+                      title={`${flag.label} - ${formatTime(flag.time)}`}
+                    />
+                  ))}
+                </div>
+              )}
               <div className="flex justify-between text-xs text-muted-foreground mt-1">
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration)}</span>
@@ -294,49 +561,54 @@ export function VideoEvidenceProcessing({
 
             {/* Control Buttons */}
             <div className="flex items-center justify-center gap-4">
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => seekRelative(-5)}
+              >
                 <SkipBack className="h-4 w-4" />
               </Button>
-              <Button size="sm" onClick={() => setIsPlaying(!isPlaying)}>
+              <Button size="sm" onClick={togglePlay}>
                 {isPlaying ? (
-                  <Pause className="h-4 w-4" />
+                  <Pause className="h-4 w-4 opacity-30" />
                 ) : (
                   <Play className="h-4 w-4" />
                 )}
               </Button>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => seekRelative(5)}
+              >
                 <SkipForward className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsMuted((m) => !m)}
+              >
                 <Volume2 className="h-4 w-4" />
               </Button>
               <Button variant="outline" size="sm">
                 <Settings className="h-4 w-4" />
               </Button>
+              {/* Set thumbnail from image */}
+              <input
+                ref={posterInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handlePosterFileChange}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => posterInputRef.current?.click()}
+                title="Set thumbnail image"
+              >
+                <ImageIcon className="h-4 w-4" />
+              </Button>
             </div>
-
-            {/* Detection Summary */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Detection Summary</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  <Badge className="bg-red-100 text-red-800">
-                    <Flag className="h-3 w-3 mr-1" />
-                    Person in red jacket (4)
-                  </Badge>
-                  <Badge className="bg-orange-100 text-orange-800">
-                    <User className="h-3 w-3 mr-1" />
-                    Suspects (2)
-                  </Badge>
-                  <Badge className="bg-yellow-100 text-yellow-800">
-                    <Zap className="h-3 w-3 mr-1" />
-                    Suspicious activity (1)
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>

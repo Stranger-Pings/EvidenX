@@ -1,6 +1,4 @@
 import { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import {
@@ -10,25 +8,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Search, Calendar, User, FileText, Plus } from "lucide-react";
-import { mockCases } from "../data/mockData";
-import { Case } from "../types/case";
+import { Search, Plus } from "lucide-react";
+// Removed dummy data import - now using API data
+import { CaseCard } from "./CaseCard";
+import { Case } from "@/types/case";
+import GradientHeader from "./common/GradientHeader";
 
 interface InvestigatorDashboardProps {
-  onCaseSelect: (caseId: string) => void;
+  onCaseSelect: (caseId: string, case_: Case) => void;
   onRegisterCase?: () => void;
+  cases: any[];
+  isLoading: boolean;
 }
 
 export function InvestigatorDashboard({
   onCaseSelect,
   onRegisterCase,
+  cases,
+  isLoading,
 }: InvestigatorDashboardProps) {
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [visibilityFilter, setVisibilityFilter] = useState<string>("all");
 
   const filteredCases = useMemo(() => {
-    return mockCases.filter((case_) => {
+    return cases.filter((case_) => {
       const matchesSearch =
         case_.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         case_.firNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -42,180 +49,90 @@ export function InvestigatorDashboard({
     });
   }, [searchTerm, statusFilter, visibilityFilter]);
 
-  const getStatusColor = (status: Case["status"]) => {
-    switch (status) {
-      case "Open":
-        return "bg-primary text-white hover:bg-blue-600";
-      case "In-Progress":
-        return "bg-yellow-500 text-white hover:bg-yellow-600";
-      case "Closed":
-        return "bg-green-500 text-white hover:bg-green-600";
-      default:
-        return "bg-gray-500 text-white hover:bg-gray-600";
-    }
-  };
-
-  const getVisibilityColor = (visibility: Case["visibility"]) => {
-    return visibility === "Private"
-      ? "bg-red-500 text-white hover:bg-red-600"
-      : "bg-purple-500 text-white hover:bg-purple-600";
-  };
-
   return (
-    <div className="h-full flex flex-col">
-      <div className="p-6 max-w-7xl mx-auto space-y-6 flex-1 overflow-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="mb-2">Case Management Hub</h1>
-            <p className="text-muted-foreground">
-              Monitor progress, review evidence, and update status
-            </p>
-          </div>
-          {onRegisterCase && (
-            <Button onClick={onRegisterCase} className="shrink-0">
-              <Plus className="h-4 w-4 mr-2 font-bold" />
-              Register New Case
-            </Button>
-          )}
+    <div className="h-full overflow-auto p-6 pt-8 flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2">
+          <GradientHeader title="Case Management Hub" />
+          <p className="text-muted-foreground">
+            Monitor progress, review evidence, and update status
+          </p>
         </div>
+        {onRegisterCase && (
+          <Button
+            onClick={onRegisterCase}
+            className="h-10 rounded-md px-6 bg-primary text-primary-foreground hover:bg-primary/90 text-md hover-lift"
+          >
+            <Plus className="h-6 w-6 mr-2 text-md font-bold" />
+            Register New Case
+          </Button>
+        )}
+      </div>
 
-        {/* Search and Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 p-4 bg-card rounded-lg border">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+      {/* Search and Filters */}
+      <div className="flex flex-col sm:flex-row gap-2 p-4 rounded-xl mt-4 justify-end">
+        <div className="w-1/4">
+          <div className="w-full relative">
+            <Search className="absolute left-4 top-[12px] text-muted-foreground h-4 w-4" />
             <Input
               placeholder="Search cases by FIR number, title, or petitioner..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-11 h-10 rounded-xl !w-full"
             />
           </div>
-
-          <div className="flex gap-2">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="Open">Open</SelectItem>
-                <SelectItem value="In-Progress">In-Progress</SelectItem>
-                <SelectItem value="Closed">Closed</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={visibilityFilter}
-              onValueChange={setVisibilityFilter}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Visibility" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Cases</SelectItem>
-                <SelectItem value="Public">Public</SelectItem>
-                <SelectItem value="Private">Private</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
         </div>
 
-        {/* Results Summary */}
-        <div className="flex items-center justify-between">
-          <p className="text-muted-foreground">
-            Showing {filteredCases.length} of {mockCases.length} cases
+        <div className="flex gap-2">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-36 !h-10 bg-card rounded-xl">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent className="bg-card">
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="Open">Open</SelectItem>
+              <SelectItem value="In-Progress">In-Progress</SelectItem>
+              <SelectItem value="Closed">Closed</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={visibilityFilter} onValueChange={setVisibilityFilter}>
+            <SelectTrigger className="w-36 !h-10 bg-card rounded-xl">
+              <SelectValue placeholder="Visibility" />
+            </SelectTrigger>
+            <SelectContent className="bg-card">
+              <SelectItem value="all">All Cases</SelectItem>
+              <SelectItem value="Public">Public</SelectItem>
+              <SelectItem value="Private">Private</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Results Summary */}
+      <div className="flex items-center justify-between py-4 ">
+        <p className="text-muted-foreground">
+          Showing {filteredCases.length} of {cases.length} cases
+        </p>
+      </div>
+
+      {/* Case Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredCases.map((case_) => (
+          <CaseCard key={case_.id} case_={case_} onCaseSelect={onCaseSelect} />
+        ))}
+      </div>
+
+      {/* Empty State */}
+      {filteredCases.length === 0 && (
+        <div className="text-center py-12">
+          <div className="text-muted-foreground mb-2">No cases found</div>
+          <p className="text-sm text-muted-foreground">
+            Try adjusting your search or filter criteria
           </p>
         </div>
-
-        {/* Case Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCases.map((case_) => (
-            <Card
-              key={case_.id}
-              className="hover:shadow-md transition-shadow flex flex-col h-full"
-            >
-              <CardHeader className="pb-3 flex-shrink-0">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex gap-2">
-                    <Badge className={getStatusColor(case_.status)}>
-                      {case_.status}
-                    </Badge>
-                    <Badge className={getVisibilityColor(case_.visibility)}>
-                      {case_.visibility}
-                    </Badge>
-                  </div>
-                </div>
-                <CardTitle className="line-clamp-2">{case_.title}</CardTitle>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <FileText className="h-3 w-3" />
-                  <span>{case_.firNumber}</span>
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-4 flex-1 flex flex-col">
-                <div className="flex-1 space-y-4">
-                  {/* Summary */}
-                  <p className="text-sm text-muted-foreground line-clamp-3">
-                    {case_.summary}
-                  </p>
-
-                  {/* Key Details */}
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <User className="h-3 w-3 text-muted-foreground" />
-                      <span className="font-medium">Petitioner:</span>
-                      <span className="text-muted-foreground truncate">
-                        {case_.petitioner}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <User className="h-3 w-3 text-muted-foreground" />
-                      <span className="font-medium">Accused:</span>
-                      <span className="text-muted-foreground truncate">
-                        {case_.accused}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <User className="h-3 w-3 text-muted-foreground" />
-                      <span className="font-medium">IO:</span>
-                      <span className="text-muted-foreground truncate">
-                        {case_.investigatingOfficer}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-3 w-3 text-muted-foreground" />
-                      <span className="font-medium">Registered:</span>
-                      <span className="text-muted-foreground">
-                        {new Date(case_.registeredDate).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Action Button */}
-                <Button
-                  onClick={() => onCaseSelect(case_.id)}
-                  className="w-full mt-auto"
-                  variant="outline"
-                >
-                  View Details
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Empty State */}
-        {filteredCases.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-muted-foreground mb-2">No cases found</div>
-            <p className="text-sm text-muted-foreground">
-              Try adjusting your search or filter criteria
-            </p>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }

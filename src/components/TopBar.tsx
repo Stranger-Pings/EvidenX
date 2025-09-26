@@ -40,7 +40,7 @@ interface TopBarProps {
 }
 
 export function TopBar({
-  investigatorName = "Inspector Sarah Williams",
+  investigatorName = "Inspector Malhotra",
   investigatorRole = "Senior Investigating Officer",
   investigatorImage,
 }: TopBarProps) {
@@ -116,15 +116,15 @@ export function TopBar({
     <div className="h-14 border-b border-border bg-card px-6 flex items-center justify-between">
       {/* Logo/Brand */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <img
+        <div className="flex items-center gap-4">
+          {/* <img
             src="/src/components/images/logo.png"
             alt="EvidenX Logo"
-            className="h-12 w-12"
-          />
-          <span className="font-semibold text-lg">
-            Eviden<span style={{ color: "#14a4de" }}>X</span>
-          </span>
+            className="h-6"
+          /> */}
+          <h1 className="text-3xl font-bold">
+            Eviden<span className="text-primary">X</span>
+          </h1>
         </div>
       </div>
 

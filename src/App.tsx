@@ -6,7 +6,9 @@ import { CaseDetailsPage } from "./components/CaseDetailsPage";
 import { VideoEvidenceProcessing } from "./components/VideoEvidenceProcessing";
 import { AudioEvidenceProcessing } from "./components/AudioEvidenceProcessing";
 import { AudioComparison } from "./components/AudioComparison";
-import { IncidentTimeline } from "./components/IncidentTimeline";
+import IncidentTimeline from "./components/IncidentTimeline";
+import { useGetCasesQuery, useGetCaseByIdQuery } from "./store/cases.api";
+import { Case } from "./types/case";
 
 type ViewType =
   | "registration"
@@ -22,11 +24,22 @@ interface AppState {
   selectedCaseId?: string;
   selectedEvidenceId?: string;
   selectedAudioIds?: string[];
+  selectedCase?: Case;
 }
 export default function App() {
   const [appState, setAppState] = useState({
-    currentView: "registration",
+    currentView: "dashboard",
   } as AppState);
+
+  const { data: cases, isLoading } = useGetCasesQuery();
+  const { data: selectedCaseData } = useGetCaseByIdQuery(appState.selectedCaseId || '', {
+    skip: !appState.selectedCaseId
+  });
+
+  console.log(cases);
+
+  // Get evidence IDs from the selected case data
+  const evidenceIds = selectedCaseData?.evidence?.map(e => e.id) || [];
 
   const navigateTo = (view: ViewType, params?: Partial<AppState>) => {
     setAppState((prev) => ({
@@ -36,12 +49,12 @@ export default function App() {
     }));
   };
 
-  const handleCaseSelect = (caseId: string) => {
-    navigateTo("case-details", { selectedCaseId: caseId });
+  const handleCaseSelect = (caseId: string, case_: Case) => {
+    navigateTo("case-details", { selectedCaseId: caseId, selectedCase: case_ });
   };
 
-  const handleViewTimeline = () => {
-    navigateTo("timeline");
+  const handleViewTimeline = (caseId: string) => {
+    navigateTo("timeline", { selectedCaseId: caseId });
   };
 
   const handleViewVideo = (evidenceId: string) => {
@@ -103,7 +116,7 @@ export default function App() {
   return (
     <div className="h-screen flex flex-col bg-background">
       <TopBar />
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
         {(() => {
           switch (appState.currentView) {
             case "registration":
@@ -119,6 +132,8 @@ export default function App() {
                 <InvestigatorDashboard
                   onCaseSelect={handleCaseSelect}
                   onRegisterCase={handleRegisterCase}
+                  cases={cases || []}
+                  isLoading={isLoading}
                 />
               );
 
@@ -134,6 +149,8 @@ export default function App() {
                   onViewVideo={handleViewVideo}
                   onViewAudio={handleViewAudio}
                   onCompareAudios={handleCompareAudios}
+                  cases={cases || []}
+                  selectedCase={selectedCaseData}
                 />
               );
 
@@ -145,6 +162,7 @@ export default function App() {
                 <VideoEvidenceProcessing
                   evidenceId={appState.selectedEvidenceId}
                   onBack={handleBack}
+                  selectedCase={selectedCaseData}
                 />
               );
 
@@ -156,6 +174,7 @@ export default function App() {
                 <AudioEvidenceProcessing
                   evidenceId={appState.selectedEvidenceId}
                   onBack={handleBack}
+                  selectedCase={selectedCaseData}
                 />
               );
 
@@ -168,9 +187,11 @@ export default function App() {
               }
               return (
                 <AudioComparison
-                  evidenceIds={appState.selectedAudioIds}
+                  evidenceIds={evidenceIds}
                   onBack={handleBack}
                   onViewAudio={handleViewAudio}
+                  selectedCase={selectedCaseData}
+                  audioComparisons={selectedCaseData?.audioComparisons || []}
                 />
               );
 

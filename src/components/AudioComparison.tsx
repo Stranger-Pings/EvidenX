@@ -3,107 +3,87 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./ui/table";
 import { ScrollArea } from "./ui/scroll-area";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "./ui/breadcrumb";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
+
 import {
-  ArrowLeft,
   Play,
   Pause,
   User,
-  AlertTriangle,
-  CheckCircle,
-  HelpCircle,
+  TriangleAlert as AlertTriangle,
+  CircleCheck as CheckCircle,
+  CircleHelp as HelpCircle,
   FileText,
   ChevronRight,
   Headphones,
   Eye,
+  Users,
+  TrendingUp,
+  Clock,
 } from "lucide-react";
-import { mockEvidence, mockAudioComparisons } from "../data/mockData";
-import { Evidence, type AudioComparison } from "../types/case";
+// Removed dummy data import - now using API data
+import { Case, Evidence, type AudioComparison } from "../types/case";
+import BackButton from "./common/BackButton";
+import GradientHeader from "./common/GradientHeader";
 
 interface AudioComparisonProps {
   evidenceIds: string[];
   onBack: () => void;
   onViewAudio: (evidenceId: string) => void;
+  audioComparisons?: AudioComparison[];
+  selectedCase?: Case;
 }
 
 export function AudioComparison({
   evidenceIds,
   onBack,
   onViewAudio,
+  audioComparisons = [],
+  selectedCase,
 }: AudioComparisonProps) {
   const [playingId, setPlayingId] = useState<string | null>(null);
-  const [selectedAudioIndex, setSelectedAudioIndex] = useState(0);
+  const [selectedAnalysisType, setSelectedAnalysisType] = useState<
+    "all" | "contradiction" | "similarity" | "gray_area"
+  >("all");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const audioEvidence = evidenceIds
-    .map((id) => mockEvidence.find((e) => e.id === id))
+    .map((id) => selectedCase?.evidence?.find((e) => e.id === id))
     .filter((e): e is Evidence => e !== undefined && e.type === "audio");
 
-  const comparisonData = mockAudioComparisons.filter((comp) =>
-    evidenceIds.includes(comp.audioId)
+  const comparisonData = (selectedCase?.audioComparisons || audioComparisons).filter(
+    (comp) => {
+      // Check if any witness audioId matches the evidenceIds
+      const hasMatchingWitnessAudio = comp.witnesses.some(witness => 
+        evidenceIds.includes(witness.audioId)
+      );
+      // Also check the mediaId1 and mediaId2 as fallback
+      const hasMatchingMedia = evidenceIds.includes(comp.mediaId1) || evidenceIds.includes(comp.mediaId2);
+      
+      return hasMatchingWitnessAudio || hasMatchingMedia;
+    }
   );
 
-  // Mock comparison analysis data
-  const analysisData = [
-    {
-      topic: "Time of incident",
-      witness1: "Around 2:30 AM",
-      witness2: "Approximately 2:15 AM",
-      status: "contradiction",
-      details: "15-minute discrepancy in reported time",
-    },
-    {
-      topic: "Number of suspects",
-      witness1: "Two individuals",
-      witness2: "Two people",
-      status: "similarity",
-      details: "Both witnesses consistently report two suspects",
-    },
-    {
-      topic: "Suspect clothing",
-      witness1: "Dark clothes and caps",
-      witness2: "Dark attire, couldn't see faces clearly",
-      status: "similarity",
-      details: "Consistent description of dark clothing",
-    },
-    {
-      topic: "Suspect behavior",
-      witness1: "Rushing, avoiding lights",
-      witness2: "Seemed in hurry, furtive movements",
-      status: "similarity",
-      details: "Both describe suspicious, hurried behavior",
-    },
-    {
-      topic: "Items carried",
-      witness1: "One person carrying something",
-      witness2: "Noticed bag or tools",
-      status: "gray_area",
-      details: "Similar observation but unclear specifics",
-    },
-    {
-      topic: "Exit observation",
-      witness1: "Didn't see them leave",
-      witness2: "Not mentioned",
-      status: "gray_area",
-      details: "Incomplete information about suspects' departure",
-    },
-  ];
+  // Get all witnesses from all comparisons
+  const allWitnesses = comparisonData.flatMap((comp) => comp.witnesses);
+
+  console.log('allWitnesses', allWitnesses);
+  console.log('comparisonData', comparisonData);
+  
+
+  // Get all detailed analysis from all comparisons
+  const analysisData = comparisonData.flatMap((comp) => comp.detailedAnalysis);
+
+  const filteredAnalysis =
+    selectedAnalysisType === "all"
+      ? analysisData
+      : analysisData.filter((item) => item.status === selectedAnalysisType);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -118,16 +98,29 @@ export function AudioComparison({
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case "contradiction":
-        return "bg-red-500 text-white border-red-500";
+        return "bg-contradiction text-contradiction-foreground border-contradiction-border shadow-sm";
       case "similarity":
-        return "bg-green-500 text-white border-green-500";
+        return "bg-similarity text-similarity-foreground border-similarity-border shadow-sm";
       case "gray_area":
-        return "bg-yellow-500 text-white border-yellow-500";
+        return "bg-gray-area text-gray-area-foreground border-gray-area-border shadow-sm";
       default:
-        return "bg-gray-500 text-white border-gray-500";
+        return "bg-muted text-muted-foreground";
+    }
+  };
+
+  const getImportanceIcon = (importance: string) => {
+    switch (importance) {
+      case "high":
+        return <TrendingUp className="h-3 w-3 text-red-500" />;
+      case "medium":
+        return <TrendingUp className="h-3 w-3 text-yellow-500" />;
+      case "low":
+        return <TrendingUp className="h-3 w-3 text-green-500" />;
+      default:
+        return null;
     }
   };
 
@@ -135,309 +128,405 @@ export function AudioComparison({
     setPlayingId(playingId === audioId ? null : audioId);
   };
 
+  const handleCardClick = (
+    analysisType: "contradiction" | "similarity" | "gray_area"
+  ) => {
+    setSelectedAnalysisType(analysisType);
+    setIsDialogOpen(true);
+  };
+
+  const contradictionCount = analysisData.filter(
+    (d) => d.status === "contradiction"
+  ).length;
+  const similarityCount = analysisData.filter(
+    (d) => d.status === "similarity"
+  ).length;
+  const grayAreaCount = analysisData.filter(
+    (d) => d.status === "gray_area"
+  ).length;
+
+  const summaryCards = [
+    {
+      id: "contradiction",
+      count: contradictionCount,
+      icon: <AlertTriangle className="h-6 w-6 text-contradiction" />,
+      title: "Contradictions Found",
+      subtitle: "Require investigation",
+      classes: {
+        border: "border-contradiction-border/20",
+        bg: "from-contradiction-muted to-background",
+        circle: "bg-contradiction/10",
+        text: "text-contradiction",
+      },
+    },
+    {
+      id: "similarity",
+      count: similarityCount,
+      icon: <CheckCircle className="h-6 w-6 text-similarity" />,
+      title: "Similarities Found",
+      subtitle: "Strong corroboration",
+      classes: {
+        border: "border-similarity-border/20",
+        bg: "from-similarity-muted to-background",
+        circle: "bg-similarity/10",
+        text: "text-similarity",
+      },
+    },
+    {
+      id: "gray_area",
+      count: grayAreaCount,
+      icon: <HelpCircle className="h-6 w-6 text-gray-area" />,
+      title: "Areas Need Clarity",
+      subtitle: "Require clarification",
+      classes: {
+        border: "border-gray-area-border/20",
+        bg: "from-gray-area-muted to-background",
+        circle: "bg-gray-area/10",
+        text: "text-gray-area",
+      },
+    },
+  ];
+
+  const getDialogTitle = () => {
+    switch (selectedAnalysisType) {
+      case "contradiction":
+        return "Contradictions Analysis";
+      case "similarity":
+        return "Similarities Analysis";
+      case "gray_area":
+        return "Gray Areas Analysis";
+      default:
+        return "Analysis Details";
+    }
+  };
+
+  const getDialogDescription = () => {
+    switch (selectedAnalysisType) {
+      case "contradiction":
+        return "Areas where witness testimonies conflict and require further investigation";
+      case "similarity":
+        return "Areas where witness testimonies align and provide strong corroboration";
+      case "gray_area":
+        return "Areas that require clarification or additional information";
+      default:
+        return "Detailed analysis of witness testimonies";
+    }
+  };
+
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="bg-background flex flex-col">
       {/* Header */}
-      <div className="border-b p-4">
-        <div className="flex items-center gap-4 pb-4 mb-4 border-b">
-          <Button variant="ghost" size="sm" onClick={onBack}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex-1">
-            <h1>Audio Comparison Analysis</h1>
-            <p className="text-sm text-muted-foreground">
-              Comparing {audioEvidence.length} audio testimonies for
-              contradictions and similarities
-            </p>
+      <div className="p-6 pt-8 border-b">
+        <BackButton onBack={onBack} location="Case" />
+        <div className="bg-card/50 flex-shrink-0">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="flex-1">
+              <GradientHeader title="Audio Comparison Analysis" />
+              <p className="text-muted-foreground mt-1 text-base">
+                Comprehensive analysis of {allWitnesses.length} witness
+                testimonies
+              </p>
+            </div>
+            <div className="flex flex-col gap-2">
+              <div className="flex text-sm items-center gap-1">
+                <Headphones className="h-4 w-4" />
+                {audioEvidence.length} Files
+              </div>
+              <div className="flex text-sm items-center gap-1">
+                <Users className="h-4 w-4" />
+                {allWitnesses.length} Witnesses
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Breadcrumb Navigation */}
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink onClick={onBack} className="cursor-pointer">
-                Case Details
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <ChevronRight className="h-4 w-4" />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbPage>Audio Comparison</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        {/* Audio Files */}
+        <div className="flex gap-2 flex-wrap">
+          {audioEvidence.map((audio, index) => (
+            <div key={audio.id} className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onViewAudio(audio.id)}
+                className="flex items-center gap-2 transition-all duration-200 !bg-blue-100 text-primary !hover:bg-blue-100"
+              >
+                <div className="text-xs flex items-center gap-1 border-r border-primary px-2 ">
+                  <Clock className="h-3 w-3" />
+                  {audio.duration}
+                </div>
+                <Headphones className="h-3 w-3" />
+                <span className="max-w-[180px] truncate">{audio.name}</span>
+              </Button>
 
-        {/* Audio Files Navigation */}
-        <div className="mt-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Headphones className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Selected Audio Files:</span>
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            {audioEvidence.map((audio, index) => (
-              <div key={audio.id} className="flex items-center gap-2">
-                <Button
-                  variant={selectedAudioIndex === index ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedAudioIndex(index)}
-                  className="flex items-center gap-2"
-                >
-                  <Headphones className="h-3 w-3" />
-                  {audio.name}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onViewAudio(audio.id)}
-                  className="p-1"
-                  title="View individual analysis"
-                >
-                  <Eye className="h-3 w-3" />
-                </Button>
-                {index < audioEvidence.length - 1 && (
-                  <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                )}
-              </div>
-            ))}
-          </div>
+              {index < audioEvidence.length - 1 && (
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
-      <div className="flex-1 p-4">
-        <Tabs defaultValue="overview" className="h-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="analysis">Detailed Analysis</TabsTrigger>
-            <TabsTrigger value="transcripts">Transcripts</TabsTrigger>
-          </TabsList>
+      <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="p-6 pt-8">
+          {/* Summary Statistics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {summaryCards.map((card) => (
+              <Card
+                key={card.id}
+                className={`${card.classes.border} bg-gradient-to-br ${card.classes.bg} cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105`}
+                onClick={() =>
+                  handleCardClick(
+                    card.id as "contradiction" | "similarity" | "gray_area"
+                  )
+                }
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className={`p-3 rounded-full ${card.classes.circle}`}>
+                      {card.icon}
+                    </div>
+                    <div>
+                      <div
+                        className={`text-3xl font-bold ${card.classes.text}`}
+                      >
+                        {card.count}
+                      </div>
+                      <div className="text-sm font-medium text-muted-foreground">
+                        {card.title}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {card.subtitle}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
-          <TabsContent value="overview" className="mt-4 space-y-6">
-            {/* Witness Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {comparisonData.map((witness) => (
-                <Card key={witness.id}>
-                  <CardHeader>
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={witness.witnessImage} />
-                        <AvatarFallback>
-                          <User className="h-6 w-6" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <CardTitle className="text-base">
-                          {witness.witnessName}
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground">
-                          Audio ID: {witness.audioId}
+          {/* Analysis Details Dialog */}
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto px-6 pt-6">
+              <DialogHeader>
+                <DialogTitle className="text-2xl flex items-center gap-2">
+                  {getStatusIcon(selectedAnalysisType)}
+                  {getDialogTitle()}
+                </DialogTitle>
+                <DialogDescription className="text-base">
+                  {getDialogDescription()}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="m-6">
+                <div className="mb-4 flex items-center gap-2">
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <FileText className="h-3 w-3" />
+                    {filteredAnalysis.length} Items Found
+                  </Badge>
+                </div>
+
+                <div className="space-y-4">
+                  {filteredAnalysis.map((analysis, index) => (
+                    <Card key={index} className="border-l-4 border-l-primary">
+                      <CardHeader className="pb-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="text-lg flex items-center gap-2">
+                              {analysis.topic}
+                              <Badge
+                                className={`${getStatusBadgeClass(
+                                  analysis.status
+                                )} flex items-center gap-1`}
+                              >
+                                {getStatusIcon(analysis.status)}
+                                {analysis.status.replace("_", " ")}
+                              </Badge>
+                            </CardTitle>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {getImportanceIcon(analysis?.importance ?? "low")}
+                            <Badge variant="outline" className="text-xs">
+                              {analysis.confidence}% confidence
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {analysis.details}
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="p-4 rounded-lg bg-muted/30 border">
+                            <h4 className="font-medium text-sm mb-2 text-primary">
+                              Witness 1
+                            </h4>
+                            <p className="text-sm italic">
+                              "{analysis.witness1}"
+                            </p>
+                          </div>
+                          <div className="p-4 rounded-lg bg-muted/30 border">
+                            <h4 className="font-medium text-sm mb-2 text-primary">
+                              Witness 2
+                            </h4>
+                            <p className="text-sm italic">
+                              "{analysis.witness2 ?? ""}"
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2 border-t">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">
+                              Importance:
+                            </span>
+                            <Badge
+                              variant={
+                                analysis.importance === "high"
+                                  ? "destructive"
+                                  : analysis.importance === "medium"
+                                  ? "default"
+                                  : "secondary"
+                              }
+                              className="text-xs"
+                            >
+                              {analysis.importance}
+                            </Badge>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Analysis #{index + 1}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Witness Overview */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-xl flex items-center gap-2">
+                <Users className="h-5 w-5 text-audio-primary" />
+                Witness Testimonies Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {allWitnesses.map((witness) => (
+                  <Card
+                    key={witness.id}
+                    className="border-l-4 border-l-blue-200 bg-blue-50/30"
+                  >
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center gap-4">
+                        <Avatar className="h-12 w-12 ring-2 ring-audio-primary/20">
+                          <AvatarImage src={witness.witnessImage} />
+                          <AvatarFallback className="bg-audio-primary/10">
+                            <User className="h-6 w-6 text-audio-primary" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <CardTitle className="text-lg">
+                            {witness.witnessName}
+                          </CardTitle>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1">
+                            <FileText className="h-3 w-3" />
+                            Audio ID: {witness.audioId}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePlayToggle(witness.audioId)}
+                            className="hover:bg-audio-primary/10"
+                          >
+                            {playingId === witness.audioId ? (
+                              <Pause className="h-3 w-3" />
+                            ) : (
+                              <Play className="h-3 w-3" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onViewAudio(witness.audioId)}
+                            className="hover:bg-audio-secondary/10"
+                          >
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <h4 className="font-medium mb-2 text-sm">Summary</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {witness.summary}
                         </p>
                       </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handlePlayToggle(witness.audioId)}
-                        >
-                          {playingId === witness.audioId ? (
-                            <Pause className="h-3 w-3" />
-                          ) : (
-                            <Play className="h-3 w-3" />
-                          )}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onViewAudio(witness.audioId)}
-                        >
+
+                      <div>
+                        <h4 className="font-medium mb-2 text-sm flex items-center gap-1">
                           <FileText className="h-3 w-3" />
-                        </Button>
+                          Full Transcript
+                        </h4>
+                        <ScrollArea className="h-40 w-full rounded border bg-muted/20 p-3">
+                          <div className="text-sm leading-relaxed text-muted-foreground">
+                            <p className="italic mb-2">"</p>
+                            <p className="indent-4">{witness.transcript}</p>
+                            <p className="italic mt-2 text-right">"</p>
+                          </div>
+                        </ScrollArea>
                       </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <h4 className="font-medium mb-2">Summary</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {witness.summary}
-                      </p>
-                    </div>
 
-                    <div className="grid grid-cols-3 gap-2 text-xs">
-                      <div className="text-center p-2 bg-red-50 rounded">
-                        <div className="font-medium text-red-700">
-                          {witness.contradictions.length}
+                      <div className="grid grid-cols-3 gap-3">
+                        <div
+                          className="text-center p-3 rounded-lg bg-contradiction-muted border border-contradiction-border/30 cursor-pointer hover:bg-contradiction-muted/80 transition-colors"
+                          onClick={() => handleCardClick("contradiction")}
+                        >
+                          <div className="font-bold text-lg text-contradiction">
+                            {witness.contradictions.length}
+                          </div>
+                          <div className="text-xs text-contradiction font-medium">
+                            Contradictions
+                          </div>
                         </div>
-                        <div className="text-red-600">Contradictions</div>
-                      </div>
-                      <div className="text-center p-2 bg-green-50 rounded">
-                        <div className="font-medium text-green-700">
-                          {witness.similarities.length}
+                        <div
+                          className="text-center p-3 rounded-lg bg-similarity-muted border border-similarity-border/30 cursor-pointer hover:bg-similarity-muted/80 transition-colors"
+                          onClick={() => handleCardClick("similarity")}
+                        >
+                          <div className="font-bold text-lg text-similarity">
+                            {witness.similarities.length}
+                          </div>
+                          <div className="text-xs text-similarity font-medium">
+                            Similarities
+                          </div>
                         </div>
-                        <div className="text-green-600">Similarities</div>
-                      </div>
-                      <div className="text-center p-2 bg-yellow-50 rounded">
-                        <div className="font-medium text-yellow-700">
-                          {witness.grayAreas.length}
+                        <div
+                          className="text-center p-3 rounded-lg bg-gray-area-muted border border-gray-area-border/30 cursor-pointer hover:bg-gray-area-muted/80 transition-colors"
+                          onClick={() => handleCardClick("gray_area")}
+                        >
+                          <div className="font-bold text-lg text-gray-area">
+                            {witness.grayAreas.length}
+                          </div>
+                          <div className="text-xs text-gray-area font-medium">
+                            Gray Areas
+                          </div>
                         </div>
-                        <div className="text-yellow-600">Gray Areas</div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Quick Summary */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Analysis Summary</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="flex items-center gap-3 p-4 border rounded-lg">
-                    <AlertTriangle className="h-5 w-5 text-red-500" />
-                    <div>
-                      <div className="font-medium">Contradictions</div>
-                      <div className="text-sm text-muted-foreground">
-                        {
-                          analysisData.filter(
-                            (d) => d.status === "contradiction"
-                          ).length
-                        }{" "}
-                        identified
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-4 border rounded-lg">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <div>
-                      <div className="font-medium">Similarities</div>
-                      <div className="text-sm text-muted-foreground">
-                        {
-                          analysisData.filter((d) => d.status === "similarity")
-                            .length
-                        }{" "}
-                        found
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-4 border rounded-lg">
-                    <HelpCircle className="h-5 w-5 text-yellow-500" />
-                    <div>
-                      <div className="font-medium">Gray Areas</div>
-                      <div className="text-sm text-muted-foreground">
-                        {
-                          analysisData.filter((d) => d.status === "gray_area")
-                            .length
-                        }{" "}
-                        require clarification
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="analysis" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">
-                  Detailed Comparison Analysis
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Point-by-point comparison of witness testimonies
-                </p>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[200px]">Topic</TableHead>
-                      <TableHead>Witness 1</TableHead>
-                      <TableHead>Witness 2</TableHead>
-                      <TableHead className="w-[120px]">Status</TableHead>
-                      <TableHead>Analysis</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {analysisData.map((row, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="font-medium">
-                          {row.topic}
-                        </TableCell>
-                        <TableCell>{row.witness1}</TableCell>
-                        <TableCell>{row.witness2}</TableCell>
-                        <TableCell>
-                          <Badge className={getStatusColor(row.status)}>
-                            {getStatusIcon(row.status)}
-                            <span className="ml-1 capitalize">
-                              {row.status.replace("_", " ")}
-                            </span>
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {row.details}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="transcripts" className="mt-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {comparisonData.map((witness) => (
-                <Card key={witness.id}>
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Avatar className="h-6 w-6">
-                        <AvatarImage src={witness.witnessImage} />
-                        <AvatarFallback>
-                          <User className="h-4 w-4" />
-                        </AvatarFallback>
-                      </Avatar>
-                      {witness.witnessName}
-                    </CardTitle>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handlePlayToggle(witness.audioId)}
-                      >
-                        {playingId === witness.audioId ? (
-                          <Pause className="h-3 w-3 mr-1" />
-                        ) : (
-                          <Play className="h-3 w-3 mr-1" />
-                        )}
-                        {playingId === witness.audioId ? "Pause" : "Play"}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onViewAudio(witness.audioId)}
-                      >
-                        <FileText className="h-3 w-3 mr-1" />
-                        Full Analysis
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-64">
-                      <div className="space-y-2 text-sm">
-                        <p className="leading-relaxed">{witness.transcript}</p>
-                      </div>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
