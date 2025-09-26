@@ -17,6 +17,8 @@ import {
   Eye,
   TrendingUp,
   MessageCircleMore,
+  Loader2,
+  CircleCheck,
 } from "lucide-react";
 import { dataValuesCases, dataValuesEvidence } from "../data/dataValues";
 import { Case, Evidence } from "../types/case";
@@ -27,6 +29,7 @@ import { VideoPlayerPopup } from "./VideoPlayerPopup";
 import ChatPanel from "./chat/ChatPanel";
 import BackButton from "./common/BackButton";
 import GradientHeader from "./common/GradientHeader";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 interface CaseDetailsPageProps {
   caseId: string;
@@ -391,6 +394,22 @@ export function CaseDetailsPage({
                                 <span className="font-medium text-sm">
                                   {evidence.type}
                                 </span>
+                                <>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      {evidence.processingStatus ===
+                                      "Processed" ? (
+                                        <CircleCheck className="h-5 w-5 mr-2 text-green-500" />
+                                      ) : (
+                                        <Loader2 className="h-5 w-5 mr-2 animate-spin text-yellow-400" />
+                                      )}
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      {evidence.processingStatus ||
+                                        "Processing"}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </>
                               </div>
                               {evidence.type === "audio" && (
                                 <input

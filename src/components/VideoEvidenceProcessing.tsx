@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
-import { Badge } from "./ui/badge";
 import { Slider } from "./ui/slider";
 import {
-  ArrowLeft,
   Play,
   Pause,
   SkipBack,
@@ -14,7 +11,6 @@ import {
   Volume2,
   Settings,
   MessageSquare,
-  Search,
   Image as ImageIcon,
 } from "lucide-react";
 import { dataValuesEvidence } from "../data/dataValues";
@@ -130,9 +126,9 @@ export function VideoEvidenceProcessing({
     { time: number; type: string; label: string; color: string }[]
   >([]);
 
-  const evidence: Evidence | undefined = dataValuesEvidence.find(
-    (e) => e.id === evidenceId
-  ) || dataValuesEvidence[0];
+  const evidence: Evidence | undefined =
+    dataValuesEvidence.find((e) => e.id === evidenceId) ||
+    dataValuesEvidence[0];
 
   if (!evidence) {
     return <div>Evidence not found</div>;
