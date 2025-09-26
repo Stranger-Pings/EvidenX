@@ -125,7 +125,7 @@ export default function ChatPanel({ caseId }: { caseId: string }) {
             value={chatQuery}
             onChange={(e) => setChatQuery(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSubmit()}
-            className="flex-1 h-9 rounded-full bg-white"
+            className="flex-1 h-9 rounded-md bg-white"
           />
           <Button
             size="sm"

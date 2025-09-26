@@ -11,7 +11,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { Button } from "./ui/button";
-import { useGetTimelineQuery } from "@/store/timeline.api";
+import BackButton from "./common/BackButton";
 
 // Type definitions
 interface DateInfo {
@@ -60,7 +60,7 @@ interface IncidentTimelineProps {
 
 const IncidentTimeline: React.FC<IncidentTimelineProps> = ({
   onBack,
-  caseId,
+  onViewEvidence,
 }) => {
   const [selectedView, setSelectedView] = useState<"timeline" | "month">(
     "timeline"
@@ -71,75 +71,262 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [timeRange] = useState<TimeRange>({ start: 0, end: 24 });
 
-  const { data: timeLineData } = useGetTimelineQuery({ caseId });
-  console.log(timeLineData);
-
   // Mock investigation data based on StoryLine.txt
-  const caseData: CaseData = useMemo(
-    () => ({
-      title: "Case #2025-1009: Missing Person - Ananya Sharma Investigation",
-      timeframe: "October 9, 2025 - 11:30 to 12:00",
-      actors: [
-        {
-          id: "suspect1",
-          name: "Unidentified Person (Black Hoodie)",
-          color: "#ef4444",
-          type: "suspect",
-        },
-        {
-          id: "victim1",
-          name: "Ananya Sharma",
-          color: "#3b82f6",
-          type: "victim",
-        },
-        {
-          id: "witness1",
-          name: "Guard Manoj",
-          color: "#10b981",
-          type: "witness",
-        },
-        {
-          id: "witness2",
-          name: "Rohan Mehra",
-          color: "#059669",
-          type: "witness",
-        },
-        { id: "witness3", name: "Sameer", color: "#16a34a", type: "witness" },
-        { id: "witness4", name: "Anuj", color: "#15803d", type: "witness" },
-        { id: "witness5", name: "Lena Roy", color: "#0d9488", type: "witness" },
-        {
-          id: "witness6",
-          name: "Mrs. Devi (Cleaner)",
-          color: "#0891b2",
-          type: "witness",
-        },
-      ],
-      incidentDates: (() => {
-        const events = (timeLineData as unknown as Event[]) || [];
-        const unique = new Map<string, DateInfo>();
-        for (const ev of events) {
-          const key = `${ev.date.month}-${ev.date.day}`;
-          if (!unique.has(key))
-            unique.set(key, { day: ev.date.day, month: ev.date.month });
-        }
-        const dates = Array.from(unique.values());
-        dates.sort((a, b) =>
-          a.month === b.month ? a.day - b.day : a.month - b.month
-        );
-        return dates;
-      })(),
-      events: (timeLineData as unknown as Event[]) || [],
-    }),
-    [timeLineData]
-  );
-  console.log(caseData);
-
-  useEffect(() => {
-    // Align the current month with the first available incident date from data
-    if (caseData.incidentDates.length > 0) {
-      setCurrentMonth(caseData.incidentDates[0].month);
-    }
-  }, [caseData.incidentDates]);
+  const caseData: CaseData = {
+    title: "Case #2025-1009: Missing Person - Ananya Sharma Investigation",
+    timeframe: "October 9, 2025 - 11:30 to 12:00",
+    actors: [
+      {
+        id: "suspect1",
+        name: "Unidentified Person (Black Hoodie)",
+        color: "#ef4444",
+        type: "suspect",
+      },
+      {
+        id: "victim1",
+        name: "Ananya Sharma",
+        color: "#3b82f6",
+        type: "victim",
+      },
+      {
+        id: "witness1",
+        name: "Guard Manoj",
+        color: "#10b981",
+        type: "witness",
+      },
+      {
+        id: "witness2",
+        name: "Rohan Mehra",
+        color: "#059669",
+        type: "witness",
+      },
+      { id: "witness3", name: "Sameer", color: "#16a34a", type: "witness" },
+      { id: "witness4", name: "Anuj", color: "#15803d", type: "witness" },
+      { id: "witness5", name: "Lena Roy", color: "#0d9488", type: "witness" },
+      {
+        id: "witness6",
+        name: "Mrs. Devi (Cleaner)",
+        color: "#0891b2",
+        type: "witness",
+      },
+    ],
+    incidentDates: [
+      { day: 9, month: 10 }, // October 9
+    ],
+    events: [
+      // Guard Manoj on duty
+      {
+        id: 1,
+        time: 11.5, // 11:30
+        duration: 0.2,
+        actor: "witness1",
+        date: { day: 9, month: 10 },
+        title: "Guard begins duty at main entrance",
+        type: "video",
+        confidence: 95,
+        evidence: "CCTV Camera #1 - Main Entrance",
+        description: "Guard Manoj starts duty near the main entrance area",
+      },
+      // Colleagues enter recreational room
+      {
+        id: 2,
+        time: 11.62, // 11:37
+        duration: 0.08,
+        actor: "victim1",
+        date: { day: 9, month: 10 },
+        title: "Ananya enters Recreational Room",
+        type: "video",
+        confidence: 98,
+        evidence: "CCTV Camera #3 - Recreational Area",
+        description:
+          "Ananya Sharma enters recreational room with Rohan and Sameer",
+      },
+      {
+        id: 3,
+        time: 11.62, // 11:37
+        duration: 0.08,
+        actor: "witness2",
+        date: { day: 9, month: 10 },
+        title: "Rohan enters Recreational Room",
+        type: "video",
+        confidence: 95,
+        evidence: "CCTV Camera #3 - Recreational Area",
+        description: "Rohan Mehra (Grey T-shirt) enters with Ananya and Sameer",
+      },
+      {
+        id: 4,
+        time: 11.62, // 11:37
+        duration: 0.08,
+        actor: "witness3",
+        date: { day: 9, month: 10 },
+        title: "Sameer enters Recreational Room",
+        type: "video",
+        confidence: 95,
+        evidence: "CCTV Camera #3 - Recreational Area",
+        description: "Sameer enters recreational room with colleagues",
+      },
+      {
+        id: 5,
+        time: 11.65, // 11:39
+        duration: 0.05,
+        actor: "witness4",
+        date: { day: 9, month: 10 },
+        title: "Anuj joins in Recreational Room",
+        type: "video",
+        confidence: 92,
+        evidence: "CCTV Camera #3 - Recreational Area",
+        description: "Anuj enters the recreational room",
+      },
+      // Rohan leaves early
+      {
+        id: 6,
+        time: 11.68, // 11:41
+        duration: 0.05,
+        actor: "witness2",
+        date: { day: 9, month: 10 },
+        title: "Rohan leaves towards elevators",
+        type: "video",
+        confidence: 90,
+        evidence: "CCTV Camera #4 - Elevator Area",
+        description:
+          "Rohan Mehra leaves recreational room and heads to elevators",
+      },
+      // Suspect interaction with guard
+      {
+        id: 7,
+        time: 11.7, // 11:42
+        duration: 0.1,
+        actor: "suspect1",
+        date: { day: 9, month: 10 },
+        title: "Unidentified person interacts with guard",
+        type: "video",
+        confidence: 85,
+        evidence: "CCTV Camera #1 - Main Entrance",
+        description:
+          "Person in black hoodie approaches Guard Manoj for ID inquiry - no ID found",
+      },
+      {
+        id: 8,
+        time: 11.7, // 11:42
+        duration: 0.1,
+        actor: "witness1",
+        date: { day: 9, month: 10 },
+        title: "Guard conducts ID check",
+        type: "witness",
+        confidence: 100,
+        evidence: "Guard Statement #1",
+        description:
+          "Guard Manoj questions unidentified person about ID - person has no identification",
+      },
+      // Ananya and colleagues leave recreational room
+      {
+        id: 9,
+        time: 11.73, // 11:44
+        duration: 0.05,
+        actor: "victim1",
+        date: { day: 9, month: 10 },
+        title: "Ananya leaves Recreational Room",
+        type: "video",
+        confidence: 95,
+        evidence: "CCTV Camera #3 - Recreational Area",
+        description:
+          "Ananya Sharma exits recreational room separately from colleagues",
+      },
+      {
+        id: 10,
+        time: 11.73, // 11:44
+        duration: 0.05,
+        actor: "witness3",
+        date: { day: 9, month: 10 },
+        title: "Colleagues leave towards desks",
+        type: "video",
+        confidence: 88,
+        evidence: "CCTV Camera #5 - Office Area",
+        description:
+          "Sameer, Anuj and others leave recreational room towards their desks",
+      },
+      // Washroom area checks
+      {
+        id: 11,
+        time: 11.77, // 11:46
+        duration: 0.08,
+        actor: "witness5",
+        date: { day: 9, month: 10 },
+        title: "Lena checks washroom corridor",
+        type: "video",
+        confidence: 82,
+        evidence: "CCTV Camera #6 - Washroom Corridor",
+        description: "Lena Roy enters washroom corridor, finds it empty",
+      },
+      {
+        id: 12,
+        time: 11.83, // 11:50
+        duration: 0.08,
+        actor: "witness6",
+        date: { day: 9, month: 10 },
+        title: "Cleaner checks washroom area",
+        type: "video",
+        confidence: 85,
+        evidence: "CCTV Camera #6 - Washroom Corridor",
+        description:
+          "Mrs. Devi (cleaner) enters washroom corridor, finds it empty",
+      },
+      // Critical interaction between suspect and victim
+      {
+        id: 13,
+        time: 11.87, // 11:52
+        duration: 0.07,
+        actor: "suspect1",
+        date: { day: 9, month: 10 },
+        title: "Suspect approaches Ananya",
+        type: "video",
+        confidence: 90,
+        evidence: "CCTV Camera #1 - Main Entrance",
+        description:
+          "Unidentified person in black hoodie interacts with Ananya near main entrance",
+      },
+      {
+        id: 14,
+        time: 11.87, // 11:52
+        duration: 0.07,
+        actor: "victim1",
+        date: { day: 9, month: 10 },
+        title: "Ananya interacts with suspect",
+        type: "video",
+        confidence: 92,
+        evidence: "CCTV Camera #1 - Main Entrance",
+        description:
+          "Ananya Sharma engages in conversation with unidentified person",
+      },
+      // Final exit - critical moment
+      {
+        id: 15,
+        time: 11.93, // 11:56
+        duration: 0.12,
+        actor: "victim1",
+        date: { day: 9, month: 10 },
+        title: "Ananya shows anxious behavior and exits",
+        type: "video",
+        confidence: 95,
+        evidence: "CCTV Camera #1 - Main Entrance",
+        description:
+          "Ananya displays anxious traits and exits main entrance with unidentified person - LAST SEEN",
+      },
+      {
+        id: 16,
+        time: 11.93, // 11:56
+        duration: 0.12,
+        actor: "suspect1",
+        date: { day: 9, month: 10 },
+        title: "Suspect exits with victim",
+        type: "video",
+        confidence: 88,
+        evidence: "CCTV Camera #1 - Main Entrance",
+        description:
+          "Unidentified person in black hoodie leaves premises with Ananya Sharma",
+      },
+    ],
+  };
   /* const caseData: CaseData = {
         title: "Case #2025-0324: Downtown Bank Robbery Investigation",
         timeframe: "March 28 - April 2, 2025",
@@ -400,7 +587,6 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({
   };
 
   const filteredEvents = useMemo(() => {
-    console.log("caseData.events", caseData.events);
     return caseData.events.filter((event) => {
       // Show all event types and actors since filters are removed
       if (event.time < timeRange.start || event.time > timeRange.end)
@@ -423,7 +609,6 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({
     });
   }, [
     caseData.events,
-    timeLineData,
     timeRange.end,
     timeRange.start,
     selectedView,
@@ -447,12 +632,8 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({
     };
   }, [filteredEvents]);
 
-  useEffect(() => {
-    console.log("filteredEvents", filteredEvents);
-  }, [filteredEvents]);
-
   const SwimLaneView: React.FC = () => (
-    <div className="bg-white rounded-lg p-6 h-full flex flex-col shadow-sm border border-slate-200">
+    <div className="bg-card rounded-lg p-6 h-full flex flex-col shadow-sm border border-slate-200">
       {/* Timeline Controls */}
       <div className="bg-slate-50 rounded-lg p-4 mb-4 border border-slate-200">
         <div className="flex items-center justify-between">
@@ -809,7 +990,7 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({
     }
 
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200">
+      <div className="bg-card rounded-lg shadow-sm border border-slate-200">
         {/* Month Header */}
         <div className="text-white p-4 rounded-t-lg bg-blue-700">
           <div className="flex items-center justify-between">
@@ -903,31 +1084,23 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({
   };
 
   return (
-    <div className="w-full p-4 lg:p-6 bg-slate-50">
+    <div className="w-full p-4 lg:p-6 bg-background">
       {/* Main content */}
       {selectedView === "month" ? (
         <MonthView />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-8rem)]">
           {/* Case info and controls sidebar */}
-          <div className="bg-white rounded-lg p-6 h-full flex flex-col shadow-sm border border-slate-200">
-            {/* Case Information */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-3">
-                <Button variant="ghost" size="sm" onClick={onBack}>
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-              </div>
+          <div className="bg-card rounded-lg h-full flex flex-col shadow-sm border border-slate-200">
+            <div className="p-6 pt-8 border-b">
+              <BackButton onBack={onBack} location="Case" />
               <h1 className="text-xl font-bold text-slate-800 mb-2">
                 {caseData.title}
               </h1>
-              <p className="text-sm text-slate-600 mb-4">
-                {caseData.timeframe}
-              </p>
+              <p className="text-sm text-slate-600">{caseData.timeframe}</p>
 
               {/* View selector */}
-              <div className="space-y-2 mb-4">
-                {/* <button
+              {/* <button
                   onClick={() => setSelectedView("month")}
                   className={`w-full flex items-center gap-2 px-3 py-2 border rounded-lg font-medium text-sm ${
                     (selectedView as string) === "month"
@@ -938,111 +1111,132 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({
                   <Clock className="w-4 h-4" />
                   Month View
                 </button> */}
-                <button
-                  onClick={() => setSelectedView("timeline")}
-                  className={`w-full flex items-center gap-2 px-3 py-2 border rounded-lg font-medium text-sm ${
-                    selectedView === "timeline"
-                      ? "bg-blue-700 text-white border-blue-700"
-                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
-                  }`}
-                >
-                  <BarChart3 className="w-4 h-4" />
-                  Timeline View
-                </button>
-              </div>
+              {/* <button
+                onClick={() => setSelectedView("timeline")}
+                className={`w-full flex items-center gap-2 mt-4 px-3 py-2 border rounded-lg font-medium text-sm ${
+                  selectedView === "timeline"
+                    ? "bg-blue-700 text-white border-blue-700"
+                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                }`}
+              >
+                <BarChart3 className="w-4 h-4" />
+                Timeline View
+              </button> */}
+              {/* </div> */}
             </div>
-
-            <h3 className="font-semibold text-slate-800 mb-4">Event Details</h3>
-            <div className="flex-1 overflow-y-auto">
-              {selectedEvent ? (
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      {getEvidenceIcon(selectedEvent.type)}
-                      <span className="font-medium">{selectedEvent.title}</span>
+            <div className="p-6">
+              <h3 className="font-semibold text-slate-800 mb-4">
+                Event Details
+              </h3>
+              <div className="flex-1 overflow-y-auto">
+                {selectedEvent ? (
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        {getEvidenceIcon(selectedEvent.type)}
+                        <span className="font-medium">
+                          {selectedEvent.title}
+                        </span>
+                      </div>
+                      <div
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs border ${getConfidenceColor(
+                          selectedEvent.confidence
+                        )}`}
+                      >
+                        <AlertTriangle className="w-3 h-3 mr-1" />
+                        {selectedEvent.confidence}% confidence
+                      </div>
                     </div>
-                    <div
-                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs border ${getConfidenceColor(
-                        selectedEvent.confidence
-                      )}`}
-                    >
-                      <AlertTriangle className="w-3 h-3 mr-1" />
-                      {selectedEvent.confidence}% confidence
+
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-1">
+                        Date & Time
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        {selectedEvent.date.month === 10 ? "October" : "Month"}{" "}
+                        {selectedEvent.date.day}, 2025 at{" "}
+                        {formatTime(selectedEvent.time)}
+                      </p>
+                    </div>
+
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-1">
+                        Evidence Source
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        {selectedEvent.evidence}
+                      </p>
+                    </div>
+
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-1">
+                        Description
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        {selectedEvent.description}
+                      </p>
+                    </div>
+                    <div className="pt-3 ">
+                      <Button
+                        onClick={() =>
+                          onViewEvidence(
+                            selectedEvent.evidence,
+                            selectedEvent.type
+                          )
+                        }
+                        variant="secondary"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-700 text-white text-sm rounded-lg hover:bg-blue-800"
+                      >
+                        <Eye className="w-4 h-4" />
+                        View Evidence
+                      </Button>
                     </div>
                   </div>
+                ) : (
+                  <p className="text-gray-500 text-sm">
+                    Click on an event in the timeline to view details
+                  </p>
+                )}
 
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-1">
-                      Date & Time
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      {selectedEvent.date.month === 10 ? "October" : "Month"}{" "}
-                      {selectedEvent.date.day}, 2025 at{" "}
-                      {formatTime(selectedEvent.time)}
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-1">
-                      Evidence Source
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      {selectedEvent.evidence}
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-1">
-                      Description
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      {selectedEvent.description}
-                    </p>
-                  </div>
-
-                  <div className="pt-3 border-t">
-                    <button className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-700 text-white text-sm rounded-lg hover:bg-blue-800">
-                      <Eye className="w-4 h-4" />
-                      View Evidence
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-gray-500 text-sm">
-                  Click on an event in the timeline to view details
-                </p>
-              )}
-
-              {/* Quick stats */}
-              <div className="mt-6 pt-4 border-t">
-                <h4 className="text-sm font-medium text-gray-700 mb-3">
-                  Case Summary
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Total Events:</span>
-                    <span className="font-medium">{filteredEvents.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Video Evidence:</span>
-                    <span className="font-medium">
-                      {filteredEvents.filter((e) => e.type === "video").length}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Audio Evidence:</span>
-                    <span className="font-medium">
-                      {filteredEvents.filter((e) => e.type === "audio").length}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Witness Accounts:</span>
-                    <span className="font-medium">
-                      {
-                        filteredEvents.filter((e) => e.type === "witness")
-                          .length
-                      }
-                    </span>
+                {/* Quick stats */}
+                <div className="mt-6 pt-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">
+                    Case Summary
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Total Events:</span>
+                      <span className="font-medium">
+                        {filteredEvents.length}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Video Evidence:</span>
+                      <span className="font-medium">
+                        {
+                          filteredEvents.filter((e) => e.type === "video")
+                            .length
+                        }
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Audio Evidence:</span>
+                      <span className="font-medium">
+                        {
+                          filteredEvents.filter((e) => e.type === "audio")
+                            .length
+                        }
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Witness Accounts:</span>
+                      <span className="font-medium">
+                        {
+                          filteredEvents.filter((e) => e.type === "witness")
+                            .length
+                        }
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

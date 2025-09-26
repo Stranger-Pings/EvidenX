@@ -13,7 +13,7 @@
     --popover-foreground: #091930;
     --primary: #0055d6;
     --primary-foreground: #ffffff;
-    --secondary: #e5effa;
+    --secondary: #60a5fa;
     --secondary-foreground: #1a3a5c;
     --muted: #f3f4f6;
     --muted-foreground: #6b7280;
@@ -140,5 +140,38 @@
   ::before,
   ::after {
     @apply border-border;
+  }
+  :where(
+      input,
+      textarea,
+      select,
+      button,
+      [type="button"],
+      [type="submit"],
+      [type="reset"],
+      [role="button"],
+      [contenteditable="true"]
+    ):focus,
+  :where(
+      input,
+      textarea,
+      select,
+      button,
+      [type="button"],
+      [type="submit"],
+      [type="reset"],
+      [role="button"],
+      [contenteditable="true"]
+    ):focus-visible {
+    outline: none !important;
+    box-shadow: none !important; /* suppress Tailwind ring */
+  }
+
+  /* Keep default border color on focus for inputs & textareas */
+  [data-slot="input"]:focus,
+  [data-slot="input"]:focus-visible,
+  [data-slot="textarea"]:focus,
+  [data-slot="textarea"]:focus-visible {
+    border-color: var(--border) !important;
   }
 }

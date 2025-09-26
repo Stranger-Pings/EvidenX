@@ -9,9 +9,10 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Search, Plus } from "lucide-react";
-import { mockCases } from "../data/mockData";
+import { dataValuesCases } from "../data/dataValues";
 import { CaseCard } from "./CaseCard";
 import { Case } from "@/types/case";
+import GradientHeader from "./common/GradientHeader";
 
 interface InvestigatorDashboardProps {
   onCaseSelect: (caseId: string, case_: Case) => void;
@@ -49,13 +50,11 @@ export function InvestigatorDashboard({
   }, [searchTerm, statusFilter, visibilityFilter]);
 
   return (
-    <div className="h-full overflow-auto px-6 pt-8 flex flex-col">
+    <div className="h-full overflow-auto p-6 pt-8 flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-2">
-          <h1 className="mb-1 text-3xl font-semibold tracking-tight">
-            Case Management Hub
-          </h1>
+          <GradientHeader title="Case Management Hub" />
           <p className="text-muted-foreground">
             Monitor progress, review evidence, and update status
           </p>
@@ -63,24 +62,26 @@ export function InvestigatorDashboard({
         {onRegisterCase && (
           <Button
             onClick={onRegisterCase}
-            className="shrink-0 h-10 rounded-xl px-4 bg-primary text-primary-foreground hover:bg-primary/90"
+            className="h-10 rounded-md px-6 bg-primary text-primary-foreground hover:bg-primary/90 text-md hover-lift"
           >
-            <Plus className="h-6 w-6 mr-2 font-bold" />
+            <Plus className="h-6 w-6 mr-2 text-md font-bold" />
             Register New Case
           </Button>
         )}
       </div>
 
       {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl mt-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-4 top-[10px] text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Search cases by FIR number, title, or petitioner..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-11 h-10 rounded-xl"
-          />
+      <div className="flex flex-col sm:flex-row gap-2 p-4 rounded-xl mt-4 justify-end">
+        <div className="w-1/4">
+          <div className="w-full relative">
+            <Search className="absolute left-4 top-[12px] text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Search cases by FIR number, title, or petitioner..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-11 h-10 rounded-xl !w-full"
+            />
+          </div>
         </div>
 
         <div className="flex gap-2">
@@ -112,7 +113,7 @@ export function InvestigatorDashboard({
       {/* Results Summary */}
       <div className="flex items-center justify-between py-4 ">
         <p className="text-muted-foreground">
-          Showing {filteredCases.length} of {mockCases.length} cases
+          Showing {filteredCases.length} of {dataValuesCases.length} cases
         </p>
       </div>
 

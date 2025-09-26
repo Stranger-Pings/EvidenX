@@ -3,7 +3,7 @@ import { Case } from "@/types/case";
 function getProgressClasses(status: Case["status"]) {
   switch (status) {
     case "Open":
-      return "bg-blue-100 text-blue-800";
+      return "bg-cyan-100 text-cyan-800";
     case "In-Progress":
       return "bg-[#fff8c8] text-[#a9714a]";
     case "Closed":
