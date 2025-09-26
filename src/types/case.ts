@@ -14,6 +14,7 @@ export interface Case {
   created_at: string;
   updated_at: string;
   evidence?: Evidence[];
+  audioComparisons?: AudioComparison[];
 }
 
 export interface Evidence {

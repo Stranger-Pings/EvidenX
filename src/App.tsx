@@ -7,7 +7,7 @@ import { VideoEvidenceProcessing } from "./components/VideoEvidenceProcessing";
 import { AudioEvidenceProcessing } from "./components/AudioEvidenceProcessing";
 import { AudioComparison } from "./components/AudioComparison";
 import IncidentTimeline from "./components/IncidentTimeline";
-import { useGetCasesQuery } from "./store/cases.api";
+import { useGetCasesQuery, useGetCaseByIdQuery } from "./store/cases.api";
 import { Case } from "./types/case";
 
 type ViewType =
@@ -32,13 +32,14 @@ export default function App() {
   } as AppState);
 
   const { data: cases, isLoading } = useGetCasesQuery();
+  const { data: selectedCaseData } = useGetCaseByIdQuery(appState.selectedCaseId || '', {
+    skip: !appState.selectedCaseId
+  });
 
   console.log(cases);
 
-  const evidenceIds = [
-    "22c99559-efca-4e6b-a0df-75a2a3d15ba9",
-    "6852a8a3-63ed-4392-9edf-28737776b7ce",
-  ];
+  // Get evidence IDs from the selected case data
+  const evidenceIds = selectedCaseData?.evidence?.map(e => e.id) || [];
 
   const navigateTo = (view: ViewType, params?: Partial<AppState>) => {
     setAppState((prev) => ({
@@ -142,16 +143,14 @@ export default function App() {
               }
               return (
                 <CaseDetailsPage
-                  caseId={
-                    cases?.find((c) => c.id === appState.selectedCaseId)?.id
-                  }
+                  caseId={appState.selectedCaseId}
                   onBack={handleBack}
                   onViewTimeline={handleViewTimeline}
                   onViewVideo={handleViewVideo}
                   onViewAudio={handleViewAudio}
                   onCompareAudios={handleCompareAudios}
                   cases={cases || []}
-                  selectedCase={appState.selectedCase}
+                  selectedCase={selectedCaseData}
                 />
               );
 
@@ -163,7 +162,7 @@ export default function App() {
                 <VideoEvidenceProcessing
                   evidenceId={appState.selectedEvidenceId}
                   onBack={handleBack}
-                  selectedCase={appState.selectedCase}
+                  selectedCase={selectedCaseData}
                 />
               );
 
@@ -175,7 +174,7 @@ export default function App() {
                 <AudioEvidenceProcessing
                   evidenceId={appState.selectedEvidenceId}
                   onBack={handleBack}
-                  selectedCase={appState.selectedCase}
+                  selectedCase={selectedCaseData}
                 />
               );
 
@@ -191,17 +190,18 @@ export default function App() {
                   evidenceIds={evidenceIds}
                   onBack={handleBack}
                   onViewAudio={handleViewAudio}
-                  selectedCase={appState.selectedCase}
+                  selectedCase={selectedCaseData}
+                  audioComparisons={selectedCaseData?.audioComparisons || []}
                 />
               );
 
             case "timeline":
-              if (!appState.selectedCase) {
+              if (!appState.selectedCaseId) {
                 return <div>No case selected</div>;
               }
               return (
                 <IncidentTimeline
-                  caseId={appState.selectedCase.id}
+                  caseId={appState.selectedCaseId}
                   onBack={handleBack}
                   onViewEvidence={handleViewEvidence}
                 />

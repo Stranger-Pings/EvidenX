@@ -13,7 +13,6 @@ import {
 } from "./ui/dialog";
 
 import {
-  ArrowLeft,
   Play,
   Pause,
   User,
@@ -28,7 +27,7 @@ import {
   TrendingUp,
   Clock,
 } from "lucide-react";
-import { dataValuesAudioComparisons } from "../data/dataValues";
+// Removed dummy data import - now using API data
 import { Case, Evidence, type AudioComparison } from "../types/case";
 import BackButton from "./common/BackButton";
 import GradientHeader from "./common/GradientHeader";
@@ -45,7 +44,7 @@ export function AudioComparison({
   evidenceIds,
   onBack,
   onViewAudio,
-  audioComparisons = dataValuesAudioComparisons,
+  audioComparisons = [],
   selectedCase,
 }: AudioComparisonProps) {
   const [playingId, setPlayingId] = useState<string | null>(null);
@@ -58,13 +57,25 @@ export function AudioComparison({
     .map((id) => selectedCase?.evidence?.find((e) => e.id === id))
     .filter((e): e is Evidence => e !== undefined && e.type === "audio");
 
-  const comparisonData = audioComparisons.filter(
-    (comp) =>
-      evidenceIds.includes(comp.mediaId1) || evidenceIds.includes(comp.mediaId2)
+  const comparisonData = (selectedCase?.audioComparisons || audioComparisons).filter(
+    (comp) => {
+      // Check if any witness audioId matches the evidenceIds
+      const hasMatchingWitnessAudio = comp.witnesses.some(witness => 
+        evidenceIds.includes(witness.audioId)
+      );
+      // Also check the mediaId1 and mediaId2 as fallback
+      const hasMatchingMedia = evidenceIds.includes(comp.mediaId1) || evidenceIds.includes(comp.mediaId2);
+      
+      return hasMatchingWitnessAudio || hasMatchingMedia;
+    }
   );
 
   // Get all witnesses from all comparisons
   const allWitnesses = comparisonData.flatMap((comp) => comp.witnesses);
+
+  console.log('allWitnesses', allWitnesses);
+  console.log('comparisonData', comparisonData);
+  
 
   // Get all detailed analysis from all comparisons
   const analysisData = comparisonData.flatMap((comp) => comp.detailedAnalysis);

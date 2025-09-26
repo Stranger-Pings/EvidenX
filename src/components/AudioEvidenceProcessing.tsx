@@ -13,7 +13,7 @@ import {
   FileText,
   AudioLines,
 } from "lucide-react";
-import { dataValuesEvidence } from "../data/dataValues";
+// Removed dummy data import - now using API data
 import { Case, Evidence } from "../types/case";
 import { motion } from "framer-motion";
 import BackButton from "./common/BackButton";

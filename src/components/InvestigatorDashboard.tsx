@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Search, Plus } from "lucide-react";
-import { dataValuesCases } from "../data/dataValues";
+// Removed dummy data import - now using API data
 import { CaseCard } from "./CaseCard";
 import { Case } from "@/types/case";
 import GradientHeader from "./common/GradientHeader";
@@ -113,7 +113,7 @@ export function InvestigatorDashboard({
       {/* Results Summary */}
       <div className="flex items-center justify-between py-4 ">
         <p className="text-muted-foreground">
-          Showing {filteredCases.length} of {dataValuesCases.length} cases
+          Showing {filteredCases.length} of {cases.length} cases
         </p>
       </div>
 
