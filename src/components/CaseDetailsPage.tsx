@@ -70,9 +70,11 @@ export function CaseDetailsPage({
   const filteredEvidence =
     caseEvidence?.filter(
       (evidence) =>
-        evidence.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        evidence.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        evidence.tags.some((tag) =>
+        evidence?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        evidence?.description
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        evidence?.tags?.some((tag) =>
           tag.toLowerCase().includes(searchTerm.toLowerCase())
         )
     ) || [];
@@ -121,7 +123,7 @@ export function CaseDetailsPage({
       const evidence = caseEvidence?.find((e) => e.id === id);
       return evidence?.type === "audio";
     });
-    if (audioEvidence.length > 1) {
+    if (audioEvidence?.length > 1) {
       onCompareAudios(audioEvidence);
     }
   };
@@ -164,10 +166,10 @@ export function CaseDetailsPage({
             <div className="flex gap-4 items-baseline">
               <div className="flex-1">
                 <div className="flex flex-col gap-2 mb-1">
-                  <GradientHeader title={case_.title} />
+                  <GradientHeader title={case_?.title} />
                   <div className="flex gap-2 mt-3">
-                    <CaseProgressBadge progress={case_.status} />
-                    <CaseAccessBadge visibility={case_.visibility} />
+                    <CaseProgressBadge progress={case_?.status} />
+                    <CaseAccessBadge visibility={case_?.visibility} />
                   </div>
                 </div>
                 {/* <p className="text-sm text-muted-foreground">
@@ -219,17 +221,20 @@ export function CaseDetailsPage({
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="grid grid-cols-2 gap-x-10 gap-y-6">
-                        <InfoItem title="FIR Number:" value={case_.firNumber} />
-                        <InfoItem title="Location:" value={case_.location} />
+                        <InfoItem
+                          title="FIR Number:"
+                          value={case_?.firNumber}
+                        />
+                        <InfoItem title="Location:" value={case_?.location} />
                         <InfoItem
                           title="Petitioner:"
-                          value={case_.petitioner}
+                          value={case_?.petitioner}
                         />
-                        <InfoItem title="Accused:" value={case_.accused} />
+                        <InfoItem title="Accused:" value={case_?.accused} />
                         <div className="col-span-2">
                           <InfoItem
                             title="Investigating Officer:"
-                            value={case_.investigatingOfficer}
+                            value={case_?.investigatingOfficer}
                           />
                         </div>
                       </div>
@@ -238,7 +243,7 @@ export function CaseDetailsPage({
                           Summary:
                         </div>
                         <p className="text-base leading-7 text-foreground">
-                          {case_.summary}
+                          {case_?.summary}
                         </p>
                       </div>
                     </CardContent>
@@ -442,7 +447,7 @@ export function CaseDetailsPage({
                               </div>
 
                               <div className="flex flex-wrap gap-1">
-                                {evidence.tags.slice(0, 3).map((tag) => (
+                                {evidence?.tags?.slice(0, 3).map((tag) => (
                                   <Badge
                                     key={tag}
                                     className="text-xs text-primary bg-blue-50"
@@ -455,7 +460,7 @@ export function CaseDetailsPage({
 
                             <div className="flex gap-2 pt-2 mt-auto">
                               <div className="flex-1">
-                                {evidence.type === "video" && (
+                                {evidence?.type === "video" && (
                                   <Button
                                     size="sm"
                                     variant="secondary"
@@ -471,7 +476,7 @@ export function CaseDetailsPage({
                                     Analyze
                                   </Button>
                                 )}
-                                {evidence.type === "audio" && (
+                                {evidence?.type === "audio" && (
                                   <Button
                                     size="sm"
                                     variant="secondary"
@@ -480,14 +485,14 @@ export function CaseDetailsPage({
                                       stopPropagation: () => void;
                                     }) => {
                                       e.stopPropagation();
-                                      onViewAudio(evidence.id);
+                                      onViewAudio(evidence?.id);
                                     }}
                                   >
                                     <Headphones className="h-3 w-3 mr-1" />
                                     Analyze
                                   </Button>
                                 )}
-                                {evidence.type === "document" && (
+                                {evidence?.type === "document" && (
                                   <Button
                                     size="sm"
                                     variant="secondary"
@@ -496,14 +501,14 @@ export function CaseDetailsPage({
                                       stopPropagation: () => void;
                                     }) => {
                                       e.stopPropagation();
-                                      handlePreviewDocument(evidence.id);
+                                      handlePreviewDocument(evidence?.id);
                                     }}
                                   >
                                     <Eye className="h-3 w-3 mr-1" />
                                     Preview
                                   </Button>
                                 )}
-                                {evidence.type === "image" && (
+                                {evidence?.type === "image" && (
                                   <Button
                                     size="sm"
                                     variant="outline"
