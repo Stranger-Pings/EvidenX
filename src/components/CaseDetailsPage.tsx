@@ -542,8 +542,8 @@ export function CaseDetailsPage({
                                 {evidence.type === "image" && (
                                   <Button
                                     size="sm"
-                                    variant="outline"
-                                    className="w-full"
+                                    variant="secondary"
+                                    className="w-full bg-secondary text-card"
                                     onClick={(e: {
                                       stopPropagation: () => void;
                                     }) => {
