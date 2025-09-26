@@ -11,7 +11,7 @@ export interface CaseDto {
 export const globalChatApi = api.injectEndpoints({
   endpoints: (build) => ({
     sendQuery: build.mutation<any, { caseId: string; query: string }>({
-      query: ({ caseId, query }) => `/video/search/${caseId}/query-knowledge-base?query=${query}`,
+      query: ({ caseId, query }) => `/video/search/${caseId}/query-knowledge-base?query=${encodeURIComponent(query)}`,
     }),
   }),
 });

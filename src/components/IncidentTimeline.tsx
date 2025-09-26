@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { Button } from "./ui/button";
 import BackButton from "./common/BackButton";
+import { useGetTimelineQuery } from "@/store/timeline.api";
+import { TimelineEvent as ApiTimelineEvent } from "@/types/case";
 
 // Type definitions
 interface DateInfo {
@@ -59,6 +61,7 @@ interface IncidentTimelineProps {
 }
 
 const IncidentTimeline: React.FC<IncidentTimelineProps> = ({
+  caseId,
   onBack,
   onViewEvidence,
 }) => {
@@ -71,6 +74,68 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [timeRange] = useState<TimeRange>({ start: 0, end: 24 });
 
+  const { data: timeLineData } = useGetTimelineQuery({ caseId });
+  console.log(timeLineData);
+
+  const mappedEvents: Event[] = useMemo(() => {
+    if (!timeLineData || !Array.isArray(timeLineData)) return [];
+    return (timeLineData as any[]).map((ev, index) => {
+      if ("time" in ev && "date" in ev) {
+        const e = ev as Event;
+        return {
+          ...e,
+          time: Number(e.time),
+          duration: Number(e.duration),
+        } as Event;
+      }
+      const api = ev as ApiTimelineEvent;
+      const dateObj = new Date(api.timestamp as unknown as string);
+      const month = dateObj.getMonth() + 1;
+      const day = dateObj.getDate();
+      const hours = dateObj.getHours();
+      const minutes = dateObj.getMinutes();
+      const time = hours + minutes / 60;
+      const type: Event["type"] =
+        api.evidenceType === "video"
+          ? "video"
+          : api.evidenceType === "audio"
+          ? "audio"
+          : "witness";
+      const actor =
+        type === "video"
+          ? "suspect1"
+          : type === "audio"
+          ? "witness1"
+          : "victim1";
+
+      return {
+        id: index + 1,
+        time,
+        duration: 0.5,
+        actor,
+        date: { day, month },
+        title: api.title,
+        type,
+        confidence: 80,
+        evidence: api.evidenceId || api.source,
+        description: api.description,
+      };
+    });
+  }, [timeLineData]);
+
+  const incidentDates: DateInfo[] = useMemo(() => {
+    const unique = new Set<string>();
+    mappedEvents.forEach((e) => {
+      unique.add(`${e.date.month}-${e.date.day}`);
+    });
+    const result = Array.from(unique).map((key) => {
+      const [month, day] = key.split("-").map((v) => parseInt(v, 10));
+      return { day, month } as DateInfo;
+    });
+    result.sort((a, b) => a.month - b.month || a.day - b.day);
+    return result;
+  }, [mappedEvents]);
+
   // Mock investigation data based on StoryLine.txt
   const caseData: CaseData = {
     title: "Case #2025-1009: Missing Person - Ananya Sharma Investigation",
@@ -80,6 +145,12 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({
         id: "suspect1",
         name: "Unidentified Person (Black Hoodie)",
         color: "#ef4444",
+        type: "suspect",
+      },
+      {
+        id: "suspect2",
+        name: "Accomplice",
+        color: "#f97316",
         type: "suspect",
       },
       {
@@ -109,452 +180,16 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({
         color: "#0891b2",
         type: "witness",
       },
-    ],
-    incidentDates: [
-      { day: 9, month: 10 }, // October 9
-    ],
-    events: [
-      // Guard Manoj on duty
       {
-        id: 1,
-        time: 11.5, // 11:30
-        duration: 0.2,
-        actor: "witness1",
-        date: { day: 9, month: 10 },
-        title: "Guard begins duty at main entrance",
-        type: "video",
-        confidence: 95,
-        evidence: "CCTV Camera #1 - Main Entrance",
-        description: "Guard Manoj starts duty near the main entrance area",
-      },
-      // Colleagues enter recreational room
-      {
-        id: 2,
-        time: 11.62, // 11:37
-        duration: 0.08,
-        actor: "victim1",
-        date: { day: 9, month: 10 },
-        title: "Ananya enters Recreational Room",
-        type: "video",
-        confidence: 98,
-        evidence: "CCTV Camera #3 - Recreational Area",
-        description:
-          "Ananya Sharma enters recreational room with Rohan and Sameer",
-      },
-      {
-        id: 3,
-        time: 11.62, // 11:37
-        duration: 0.08,
-        actor: "witness2",
-        date: { day: 9, month: 10 },
-        title: "Rohan enters Recreational Room",
-        type: "video",
-        confidence: 95,
-        evidence: "CCTV Camera #3 - Recreational Area",
-        description: "Rohan Mehra (Grey T-shirt) enters with Ananya and Sameer",
-      },
-      {
-        id: 4,
-        time: 11.62, // 11:37
-        duration: 0.08,
-        actor: "witness3",
-        date: { day: 9, month: 10 },
-        title: "Sameer enters Recreational Room",
-        type: "video",
-        confidence: 95,
-        evidence: "CCTV Camera #3 - Recreational Area",
-        description: "Sameer enters recreational room with colleagues",
-      },
-      {
-        id: 5,
-        time: 11.65, // 11:39
-        duration: 0.05,
-        actor: "witness4",
-        date: { day: 9, month: 10 },
-        title: "Anuj joins in Recreational Room",
-        type: "video",
-        confidence: 92,
-        evidence: "CCTV Camera #3 - Recreational Area",
-        description: "Anuj enters the recreational room",
-      },
-      // Rohan leaves early
-      {
-        id: 6,
-        time: 11.68, // 11:41
-        duration: 0.05,
-        actor: "witness2",
-        date: { day: 9, month: 10 },
-        title: "Rohan leaves towards elevators",
-        type: "video",
-        confidence: 90,
-        evidence: "CCTV Camera #4 - Elevator Area",
-        description:
-          "Rohan Mehra leaves recreational room and heads to elevators",
-      },
-      // Suspect interaction with guard
-      {
-        id: 7,
-        time: 11.7, // 11:42
-        duration: 0.1,
-        actor: "suspect1",
-        date: { day: 9, month: 10 },
-        title: "Unidentified person interacts with guard",
-        type: "video",
-        confidence: 85,
-        evidence: "CCTV Camera #1 - Main Entrance",
-        description:
-          "Person in black hoodie approaches Guard Manoj for ID inquiry - no ID found",
-      },
-      {
-        id: 8,
-        time: 11.7, // 11:42
-        duration: 0.1,
-        actor: "witness1",
-        date: { day: 9, month: 10 },
-        title: "Guard conducts ID check",
-        type: "witness",
-        confidence: 100,
-        evidence: "Guard Statement #1",
-        description:
-          "Guard Manoj questions unidentified person about ID - person has no identification",
-      },
-      // Ananya and colleagues leave recreational room
-      {
-        id: 9,
-        time: 11.73, // 11:44
-        duration: 0.05,
-        actor: "victim1",
-        date: { day: 9, month: 10 },
-        title: "Ananya leaves Recreational Room",
-        type: "video",
-        confidence: 95,
-        evidence: "CCTV Camera #3 - Recreational Area",
-        description:
-          "Ananya Sharma exits recreational room separately from colleagues",
-      },
-      {
-        id: 10,
-        time: 11.73, // 11:44
-        duration: 0.05,
-        actor: "witness3",
-        date: { day: 9, month: 10 },
-        title: "Colleagues leave towards desks",
-        type: "video",
-        confidence: 88,
-        evidence: "CCTV Camera #5 - Office Area",
-        description:
-          "Sameer, Anuj and others leave recreational room towards their desks",
-      },
-      // Washroom area checks
-      {
-        id: 11,
-        time: 11.77, // 11:46
-        duration: 0.08,
-        actor: "witness5",
-        date: { day: 9, month: 10 },
-        title: "Lena checks washroom corridor",
-        type: "video",
-        confidence: 82,
-        evidence: "CCTV Camera #6 - Washroom Corridor",
-        description: "Lena Roy enters washroom corridor, finds it empty",
-      },
-      {
-        id: 12,
-        time: 11.83, // 11:50
-        duration: 0.08,
-        actor: "witness6",
-        date: { day: 9, month: 10 },
-        title: "Cleaner checks washroom area",
-        type: "video",
-        confidence: 85,
-        evidence: "CCTV Camera #6 - Washroom Corridor",
-        description:
-          "Mrs. Devi (cleaner) enters washroom corridor, finds it empty",
-      },
-      // Critical interaction between suspect and victim
-      {
-        id: 13,
-        time: 11.87, // 11:52
-        duration: 0.07,
-        actor: "suspect1",
-        date: { day: 9, month: 10 },
-        title: "Suspect approaches Ananya",
-        type: "video",
-        confidence: 90,
-        evidence: "CCTV Camera #1 - Main Entrance",
-        description:
-          "Unidentified person in black hoodie interacts with Ananya near main entrance",
-      },
-      {
-        id: 14,
-        time: 11.87, // 11:52
-        duration: 0.07,
-        actor: "victim1",
-        date: { day: 9, month: 10 },
-        title: "Ananya interacts with suspect",
-        type: "video",
-        confidence: 92,
-        evidence: "CCTV Camera #1 - Main Entrance",
-        description:
-          "Ananya Sharma engages in conversation with unidentified person",
-      },
-      // Final exit - critical moment
-      {
-        id: 15,
-        time: 11.93, // 11:56
-        duration: 0.12,
-        actor: "victim1",
-        date: { day: 9, month: 10 },
-        title: "Ananya shows anxious behavior and exits",
-        type: "video",
-        confidence: 95,
-        evidence: "CCTV Camera #1 - Main Entrance",
-        description:
-          "Ananya displays anxious traits and exits main entrance with unidentified person - LAST SEEN",
-      },
-      {
-        id: 16,
-        time: 11.93, // 11:56
-        duration: 0.12,
-        actor: "suspect1",
-        date: { day: 9, month: 10 },
-        title: "Suspect exits with victim",
-        type: "video",
-        confidence: 88,
-        evidence: "CCTV Camera #1 - Main Entrance",
-        description:
-          "Unidentified person in black hoodie leaves premises with Ananya Sharma",
+        id: "location1",
+        name: "Bank Branch",
+        color: "#6b7280",
+        type: "location",
       },
     ],
+    incidentDates: incidentDates,
+    events: mappedEvents,
   };
-  /* const caseData: CaseData = {
-        title: "Case #2025-0324: Downtown Bank Robbery Investigation",
-        timeframe: "March 28 - April 2, 2025",
-        actors: [
-            { id: "suspect1", name: "Suspect A", color: "#ef4444", type: "suspect" },
-            { id: "suspect2", name: "Suspect B", color: "#dc2626", type: "suspect" },
-            { id: "victim1", name: "Bank Teller", color: "#3b82f6", type: "victim" },
-            {
-                id: "witness1",
-                name: "Customer #1",
-                color: "#10b981",
-                type: "witness",
-            },
-            {
-                id: "witness2",
-                name: "Security Guard",
-                color: "#059669",
-                type: "witness",
-            },
-            {
-                id: "location1",
-                name: "Bank Interior",
-                color: "#8b5cf6",
-                type: "location",
-            },
-        ],
-        incidentDates: [
-            { day: 28, month: 3 }, // March 28
-            { day: 31, month: 3 }, // March 31
-            { day: 1, month: 4 }, // April 1
-            { day: 2, month: 4 }, // April 2
-        ],
-        events: [
-            // Day 1 (March 28) - Initial Planning & Surveillance
-            {
-                id: 1,
-                time: 14.0,
-                duration: 2.0,
-                actor: "suspect1",
-                date: { day: 28, month: 3 },
-                title: "Bank surveillance begins",
-                type: "video",
-                confidence: 85,
-                evidence: "CCTV Camera #3 - Exterior",
-                description:
-                    "Suspect A observed studying bank layout and security patterns",
-            },
-            {
-                id: 2,
-                time: 16.5,
-                duration: 0.5,
-                actor: "suspect2",
-                date: { day: 28, month: 3 },
-                title: "Vehicle reconnaissance",
-                type: "video",
-                confidence: 78,
-                evidence: "Traffic Camera #12",
-                description:
-                    "Red sedan circles block multiple times, license partially obscured",
-            },
-
-            // Day 2 (March 31) - Team Meeting & Preparation
-            {
-                id: 3,
-                time: 11.0,
-                duration: 1.0,
-                actor: "suspect1",
-                date: { day: 31, month: 3 },
-                title: "Suspects meet at location",
-                type: "witness",
-                confidence: 82,
-                evidence: "Witness Statement #1",
-                description:
-                    "Two individuals seen meeting at nearby café, appeared to be planning",
-            },
-            {
-                id: 4,
-                time: 15.0,
-                duration: 0.3,
-                actor: "suspect2",
-                date: { day: 31, month: 3 },
-                title: "Equipment acquisition",
-                type: "video",
-                confidence: 90,
-                evidence: "Store CCTV #5",
-                description: "Purchase of masks and tools from hardware store",
-            },
-
-            // Day 3 (April 1) - The Bank Robbery
-            {
-                id: 5,
-                time: 8.5,
-                duration: 0.5,
-                actor: "suspect1",
-                date: { day: 1, month: 4 },
-                title: "Suspect A arrives at bank area",
-                type: "video",
-                confidence: 95,
-                evidence: "CCTV Camera #3 - Exterior",
-                description:
-                    "Individual in blue jacket observed loitering near bank entrance",
-            },
-            {
-                id: 6,
-                time: 8.7,
-                duration: 0.3,
-                actor: "suspect2",
-                date: { day: 1, month: 4 },
-                title: "Getaway vehicle positioned",
-                type: "video",
-                confidence: 87,
-                evidence: "CCTV Camera #1 - Parking",
-                description: "Red sedan parks in optimal escape position",
-            },
-            {
-                id: 7,
-                time: 9.2,
-                duration: 0.8,
-                actor: "suspect1",
-                date: { day: 1, month: 4 },
-                title: "Bank entry - robbery begins",
-                type: "video",
-                confidence: 98,
-                evidence: "CCTV Camera #5 - Entrance",
-                description: "Suspect enters bank, face covered, weapon visible",
-            },
-            {
-                id: 8,
-                time: 9.3,
-                duration: 0.3,
-                actor: "victim1",
-                date: { day: 1, month: 4 },
-                title: "Silent alarm activated",
-                type: "location",
-                confidence: 100,
-                evidence: "Security System Log",
-                description: "Bank teller triggers panic button under duress",
-            },
-            {
-                id: 9,
-                time: 9.5,
-                duration: 2.0,
-                actor: "witness2",
-                date: { day: 1, month: 4 },
-                title: "Emergency response call",
-                type: "audio",
-                confidence: 92,
-                evidence: "911 Call Recording #447",
-                description: "Security guard reports robbery in progress",
-            },
-            {
-                id: 10,
-                time: 10.0,
-                duration: 0.5,
-                actor: "suspect1",
-                date: { day: 1, month: 4 },
-                title: "Cash obtained and exit",
-                type: "video",
-                confidence: 95,
-                evidence: "CCTV Camera #6 - Counter",
-                description: "Suspect receives money bag, exits through main entrance",
-            },
-            {
-                id: 11,
-                time: 10.2,
-                duration: 0.2,
-                actor: "suspect2",
-                date: { day: 1, month: 4 },
-                title: "Escape vehicle departure",
-                type: "video",
-                confidence: 90,
-                evidence: "CCTV Camera #1 - Parking",
-                description: "Red sedan speeds away from scene",
-            },
-
-            // Day 4 (April 2) - Investigation & Evidence Discovery
-            {
-                id: 12,
-                time: 9.0,
-                duration: 1.0,
-                actor: "witness1",
-                date: { day: 2, month: 4 },
-                title: "Witness comes forward",
-                type: "witness",
-                confidence: 88,
-                evidence: "Witness Statement #2",
-                description:
-                    "Customer provides detailed description of suspects and vehicle",
-            },
-            {
-                id: 13,
-                time: 14.0,
-                duration: 0.5,
-                actor: "location1",
-                date: { day: 2, month: 4 },
-                title: "Evidence collection",
-                type: "location",
-                confidence: 95,
-                evidence: "Forensic Report #1",
-                description:
-                    "Fingerprints and DNA evidence recovered from bank counter",
-            },
-            {
-                id: 14,
-                time: 16.0,
-                duration: 1.5,
-                actor: "suspect2",
-                date: { day: 2, month: 4 },
-                title: "Vehicle abandonment",
-                type: "video",
-                confidence: 92,
-                evidence: "CCTV Camera #8 - Industrial Area",
-                description: "Red sedan found abandoned, forensic team deployed",
-            },
-        ],
-    };*/
-  /* ,
-      connections: [
-        { from: 1, to: 3, type: 'sequence', strength: 'strong' },
-        { from: 2, to: 10, type: 'sequence', strength: 'strong' },
-        { from: 5, to: 6, type: 'triggered', strength: 'strong' },
-        { from: 6, to: 7, type: 'response', strength: 'medium' },
-        { from: 5, to: 8, type: 'sequence', strength: 'strong' },
-        { from: 8, to: 9, type: 'sequence', strength: 'strong' },
-        { from: 9, to: 10, type: 'sequence', strength: 'strong' },
-        { from: 3, to: 4, type: 'observation', strength: 'weak' }
-      ]
-    };*/
 
   const getEvidenceIcon = (type: Event["type"]): React.ReactNode => {
     switch (type) {
@@ -631,6 +266,12 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({
       end: Math.ceil(maxTime + 0.5),
     };
   }, [filteredEvents]);
+
+  useEffect(() => {
+    if (mappedEvents.length > 0 && !selectedDate) {
+      setCurrentMonth(mappedEvents[0].date.month);
+    }
+  }, [mappedEvents, selectedDate]);
 
   const SwimLaneView: React.FC = () => (
     <div className="bg-card rounded-lg p-6 h-full flex flex-col shadow-sm border border-slate-200">
@@ -907,56 +548,9 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({
             </div>
           ))}
         </div>
-
-        {/* Connection lines */}
-        {/* <svg className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
-        {caseData.connections.map((conn, idx) => {
-          const fromEvent = filteredEvents.find(e => e.id === conn.from);
-          const toEvent = filteredEvents.find(e => e.id === conn.to);
-          if (!fromEvent || !toEvent) return null;
-
-          const fromActor = caseData.actors.findIndex(a => a.id === fromEvent.actor);
-          const toActor = caseData.actors.findIndex(a => a.id === toEvent.actor);
-          
-          const timelineWidth = 800; // matches min-w-[800px]
-          const x1 = 270 + ((fromEvent.time - dataTimeRange.start) / (dataTimeRange.end - dataTimeRange.start)) * timelineWidth;
-          const y1 = 40 + fromActor * 76;
-          const x2 = 270 + ((toEvent.time - dataTimeRange.start) / (dataTimeRange.end - dataTimeRange.start)) * timelineWidth;
-          const y2 = 40 + toActor * 76;
-
-          return (
-            <line
-              key={idx}
-              x1={x1} y1={y1} x2={x2} y2={y2}
-              stroke={conn.strength === 'strong' ? '#3b82f6' : conn.strength === 'medium' ? '#10b981' : '#6b7280'}
-              strokeWidth={conn.strength === 'strong' ? 2 : 1}
-              strokeDasharray={conn.strength === 'weak' ? '5,5' : 'none'}
-              opacity={0.6}
-            />
-          );
-        })}
-      </svg> */}
       </div>
     </div>
   );
-
-  // NetworkView component - currently unused but kept for future implementation
-  // const NetworkView: React.FC = () => (
-  //   <div className="flex flex-col items-center justify-center h-96 bg-gray-50 rounded-lg">
-  //     <Network className="w-16 h-16 text-gray-400 mb-4" />
-  //     <h3 className="text-lg font-semibold text-gray-600 mb-2">
-  //       Network Analysis View
-  //     </h3>
-  //     <p className="text-gray-500 text-center max-w-md">
-  //       Interactive network graph showing relationships between evidence,
-  //       actors, and events.
-  //       <br />
-  //       <span className="text-sm italic mt-2 block">
-  //         (This view would show nodes connected by relationship strength)
-  //       </span>
-  //     </p>
-  //   </div>
-  // );
 
   const MonthView: React.FC = () => {
     const monthNames = [
