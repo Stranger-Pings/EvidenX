@@ -13,14 +13,14 @@ import {
   MessageSquare,
   Image as ImageIcon,
 } from "lucide-react";
-import { dataValuesEvidence } from "../data/dataValues";
-import { Evidence } from "../types/case";
+import { Case, Evidence } from "../types/case";
 import GradientHeader from "./common/GradientHeader";
 import BackButton from "./common/BackButton";
 
 interface VideoEvidenceProcessingProps {
   evidenceId: string;
   onBack: () => void;
+  selectedCase?: Case;
 }
 
 type ChatEntry = {
@@ -54,6 +54,7 @@ function Bubble({
 export function VideoEvidenceProcessing({
   evidenceId,
   onBack,
+  selectedCase,
 }: VideoEvidenceProcessingProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -62,7 +63,7 @@ export function VideoEvidenceProcessing({
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [posterUrl, setPosterUrl] = useState<string | undefined>(undefined);
+  // const [posterUrl, setPosterUrl] = useState<string | undefined>(undefined);
   const [videoSize, setVideoSize] = useState<{ width: number; height: number }>(
     {
       width: 0,
@@ -126,9 +127,13 @@ export function VideoEvidenceProcessing({
     { time: number; type: string; label: string; color: string }[]
   >([]);
 
-  const evidence: Evidence | undefined =
-    dataValuesEvidence.find((e) => e.id === evidenceId) ||
-    dataValuesEvidence[0];
+  const evidence: Evidence | undefined = selectedCase?.evidence?.find(
+    (e) => e.id === evidenceId
+  );
+
+  const [posterUrl, setPosterUrl] = useState<string | undefined>(
+    evidence?.thumbnail || undefined
+  );
 
   if (!evidence) {
     return <div>Evidence not found</div>;
@@ -457,8 +462,8 @@ export function VideoEvidenceProcessing({
           >
             <video
               ref={videoRef}
-              src={"https://evidenx.s3.us-east-1.amazonaws.com/CCTV_Master.mp4"}
-              poster={posterUrl || evidence.thumbnail}
+              src={evidence?.url || ""}
+              poster={posterUrl || evidence?.thumbnail || ""}
               className="absolute inset-0 w-full h-full object-contain bg-black"
               muted={isMuted}
               playsInline

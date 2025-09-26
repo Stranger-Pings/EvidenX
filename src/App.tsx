@@ -163,6 +163,7 @@ export default function App() {
                 <VideoEvidenceProcessing
                   evidenceId={appState.selectedEvidenceId}
                   onBack={handleBack}
+                  selectedCase={appState.selectedCase}
                 />
               );
 
@@ -174,6 +175,7 @@ export default function App() {
                 <AudioEvidenceProcessing
                   evidenceId={appState.selectedEvidenceId}
                   onBack={handleBack}
+                  selectedCase={appState.selectedCase}
                 />
               );
 
@@ -189,6 +191,7 @@ export default function App() {
                   evidenceIds={evidenceIds}
                   onBack={handleBack}
                   onViewAudio={handleViewAudio}
+                  selectedCase={appState.selectedCase}
                 />
               );
 

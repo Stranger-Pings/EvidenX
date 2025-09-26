@@ -29,6 +29,9 @@ export interface Evidence {
   thumbnail?: string;
   duration?: string; // for audio/video
   processingStatus?: "Pending" | "Processed";
+  transcript?: string;
+  uploadedAt?: string;
+
 }
 
 export interface TimelineEvent {

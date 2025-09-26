@@ -28,11 +28,8 @@ import {
   TrendingUp,
   Clock,
 } from "lucide-react";
-import {
-  dataValuesEvidence,
-  dataValuesAudioComparisons,
-} from "../data/dataValues";
-import { Evidence, type AudioComparison } from "../types/case";
+import { dataValuesAudioComparisons } from "../data/dataValues";
+import { Case, Evidence, type AudioComparison } from "../types/case";
 import BackButton from "./common/BackButton";
 import GradientHeader from "./common/GradientHeader";
 
@@ -41,6 +38,7 @@ interface AudioComparisonProps {
   onBack: () => void;
   onViewAudio: (evidenceId: string) => void;
   audioComparisons?: AudioComparison[];
+  selectedCase?: Case;
 }
 
 export function AudioComparison({
@@ -48,6 +46,7 @@ export function AudioComparison({
   onBack,
   onViewAudio,
   audioComparisons = dataValuesAudioComparisons,
+  selectedCase,
 }: AudioComparisonProps) {
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [selectedAnalysisType, setSelectedAnalysisType] = useState<
@@ -56,7 +55,7 @@ export function AudioComparison({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const audioEvidence = evidenceIds
-    .map((id) => dataValuesEvidence.find((e) => e.id === id))
+    .map((id) => selectedCase?.evidence?.find((e) => e.id === id))
     .filter((e): e is Evidence => e !== undefined && e.type === "audio");
 
   const comparisonData = audioComparisons.filter(

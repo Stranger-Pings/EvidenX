@@ -14,7 +14,7 @@ import {
   AudioLines,
 } from "lucide-react";
 import { dataValuesEvidence } from "../data/dataValues";
-import { Evidence } from "../types/case";
+import { Case, Evidence } from "../types/case";
 import { motion } from "framer-motion";
 import BackButton from "./common/BackButton";
 import GradientHeader from "./common/GradientHeader";
@@ -22,24 +22,18 @@ import GradientHeader from "./common/GradientHeader";
 interface AudioEvidenceProcessingProps {
   evidenceId: string;
   onBack: () => void;
+  selectedCase?: Case;
 }
 
 export function AudioEvidenceProcessing({
   evidenceId,
   onBack,
+  selectedCase,
 }: AudioEvidenceProcessingProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0); // Mock current time in seconds
   const [duration, setDuration] = useState(0);
-  const [transcript] = useState(
-    `speaker_0: "good evening i need to ask you about the missing person sarah green when did you last see her"
-speaker_1: "i saw her yesterday i found six in the evening near the old life"
-speaker_0: "interesting did she mention where she was going"
-speaker_1: "yes she said she was heading to meet a friend at the cafe on main street alright"
-speaker_0: "did you notice anything unusual about her behavior"
-speaker_1: "she seemed nervous like she was being followed"
-speaker_0: "thank you your information will help us investigating further"`
-  );
+
   const [followUpQuestions, setFollowUpQuestions] = useState([
     "Can you describe the tools or bag you mentioned in more detail?",
     "What was your exact position when you first spotted the suspects?",
@@ -50,9 +44,11 @@ speaker_0: "thank you your information will help us investigating further"`
   const [newQuestion, setNewQuestion] = useState("");
   const [showQuestions, setShowQuestions] = useState(false);
 
-  const evidence: Evidence | undefined = dataValuesEvidence.find(
+  const evidence: Evidence | undefined = selectedCase?.evidence?.find(
     (e) => e.id === evidenceId
   );
+
+  const transcript = evidence?.transcript || "";
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
