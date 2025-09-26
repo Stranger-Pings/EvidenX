@@ -39,6 +39,22 @@ export default function ChatPanel({
   setCurrentVideoTitle: (title: string) => void;
   setVideoPlayerOpen: (open: boolean) => void;
 }) {
+  const [chatHistory, setChatHistory] = useState<ChatItem[]>([]);
+  const [chatQuery, setChatQuery] = useState("");
+  const [sendQuery, { isLoading: isSending }] = useSendQueryMutation();
+  const handleSubmit = async () => {
+    if (chatQuery.trim()) {
+      const response = await sendQuery({ caseId, query: chatQuery });
+      setChatHistory([
+        ...chatHistory,
+        {
+          query: chatQuery,
+          response: response?.data?.message || "No response",
+        },
+      ]);
+      setChatQuery("");
+    }
+  };
   return (
     <div className="w-80 bg-gradient-to-b from-blue-50 to-blue-100/40 border-r flex flex-col h-full">
       <div className="p-4 flex-shrink-0">
@@ -58,27 +74,32 @@ export default function ChatPanel({
               <div className="flex justify-end">
                 <Bubble variant="query">{chat.query}</Bubble>
               </div>
-
-              <div className="flex justify-start">
-                <Bubble variant="response">
-                  <div>{chat.response}</div>
-                  {chat.videoTimestamp && (
-                    <Button
-                      variant="link"
-                      size="sm"
-                      className="p-0 h-auto text-blue-200 underline mt-2"
-                      onClick={() => {
-                        setVideoTimestamp(chat.videoTimestamp || 0);
-                        setCurrentVideoTitle("CCTV Footage - Main Entrance");
-                        setVideoPlayerOpen(true);
-                      }}
-                    >
-                      Jump to video ({Math.floor(chat.videoTimestamp / 60)}:
-                      {(chat.videoTimestamp % 60).toString().padStart(2, "0")})
-                    </Button>
-                  )}
-                </Bubble>
-              </div>
+              {chat.response && (
+                <div className="flex justify-start">
+                  <Bubble variant="response">
+                    <div>{chat.response}</div>
+                    {chat.videoTimestamp && (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="p-0 h-auto text-blue-200 underline mt-2"
+                        onClick={() => {
+                          setVideoTimestamp(chat.videoTimestamp as number);
+                          setCurrentVideoTitle("Evidence Video");
+                          setVideoPlayerOpen(true);
+                        }}
+                      >
+                        Jump to video (
+                        {Math.floor((chat.videoTimestamp as number) / 60)}:
+                        {((chat.videoTimestamp as number) % 60)
+                          .toString()
+                          .padStart(2, "0")}
+                        )
+                      </Button>
+                    )}
+                  </Bubble>
+                </div>
+              )}
             </div>
           ))}
         </div>
