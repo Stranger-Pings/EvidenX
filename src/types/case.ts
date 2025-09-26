@@ -28,7 +28,7 @@ export interface Evidence {
   tags: string[];
   thumbnail?: string;
   duration?: string; // for audio/video
-  processingStatus?: "Pending" | "Processed";
+  processingStatus?: "processed" | "processing";
 }
 
 export interface TimelineEvent {

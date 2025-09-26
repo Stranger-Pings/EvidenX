@@ -157,7 +157,7 @@ export function CaseDetailsPage({
         {/* Chat Panel */}
         {isChatPanelOpen && (
           <ChatPanel
-          caseId={caseId || ""}
+            caseId={caseId || ""}
             setVideoTimestamp={setVideoTimestamp}
             setCurrentVideoTitle={setCurrentVideoTitle}
             setVideoPlayerOpen={setVideoPlayerOpen}
@@ -372,8 +372,8 @@ export function CaseDetailsPage({
                                 <>
                                   <Tooltip>
                                     <TooltipTrigger>
-                                      {evidence.processingStatus ===
-                                      "Processed" ? (
+                                      {evidence?.processingStatus ===
+                                      "processed" ? (
                                         <CircleCheck className="h-5 w-5 mr-2 text-green-500" />
                                       ) : (
                                         <Loader2 className="h-5 w-5 mr-2 animate-spin text-yellow-400" />
